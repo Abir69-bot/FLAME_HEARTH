@@ -1,11 +1,37 @@
 # HEARTH progress
 
 ## Status
-- Next phase: 2 (waiting for "go" after the Phase 1 plan review)
+- Next phase: 3 (waiting for the user's "go"; the user wants a report + "go" after every phase)
 - Live URL: https://project-hearth-five.vercel.app
 - AI engines with keys: Groq and Gemini set in `.env.local`; Claude key empty. Vercel env vars NOT yet added (the tool permission was denied; see Phase 1 problems).
 
 ## Log
+
+### Phase 2 done
+**Done**
+- `scripts/ingest/ingest.py`: one adapter per investigation → `data/processed/tests.json` (889 tests: ACME 333, CFI 87, SPICE 469), `chunks.json` (1066 page-aware chunks, ~800 chars / 100 overlap), `pdf_tables.json` (94 tables), `ingest_report.md`. Range checks: 8 SPICE rows with negative airflow kept and flagged. Duplicates flagged: CFI 8, SPICE 34. 6 pytest tests (`python -m pytest scripts/ingest`, run from the repo root).
+- `lib/types.ts` (zod schemas), `lib/data.ts` (load once, filter/sort/stats/sources), `lib/util.ts` (pure helpers, safe for the browser), `lib/missions.ts` (ISS, Moon base, Lunar rover demo, Spacesuit), `lib/physics.ts` (pO2, ratio to ISS, O2 vs Earth, flow regime, unit conversion, envelope check, nearest tests, heuristic hazard index with parts), `lib/bins.ts`, `lib/analysis.ts` (compare, rank, gaps), `lib/search.ts` (MiniSearch).
+- VESTA data tools in `lib/vesta/tools/`: query_data, search_docs, physics_calc, nearest_tests, envelope_check, compare, rank_investigations, gap_finder. Zod inputs, `runTool` validates and never throws, every result has sources and a confidence tag.
+- API: missions, tests, tests/[id], map, rank, gaps, compare, search, calc (POST). `docs/API.md` with real example responses.
+- 36 vitest tests (physics hand calculations: 34% at 8.2 psi = 2.788 psi, ISS = 3.087 psi, ratio 0.903).
+
+**Decisions**
+- Defaults for Q2 (SPICE 21% / 101 kPa from Report p20) and Q3 (duplicates flagged, not counted) adopted; Q1 flow columns stay in `extra` only.
+- Envelope window ±5 percentage points O2 and ±2.5 psi; nearest-test distance is normalised so 1.0 = envelope edge.
+- Ranking score = proximity 40 + O2 coverage 20 + pressure coverage 20 + tests-in-envelope 20 (constants in `lib/analysis.ts`). Hazard index = O2 concentration 40 + pO2 20 + airflow 20 + data coverage 20, labelled "heuristic".
+- No Mars mission: no sourced values.
+- `tsconfig` target set to ES2020.
+
+**Findings worth knowing**
+- Lunar rover (34% / 8.2 psi): supported, 28 ACME CFI-G tests inside the envelope (all gaseous spherical flames, no materials). Moon base: supported (6). Spacesuit: no_data. ISS: supported (518).
+- Gaps: no solid fuels, only microgravity, spacesuit cell empty, 13 empty cells in the 21–50% O2 / < 14 psi exploration region.
+
+**Problems**
+- Bash heredocs with long TS content failed to parse in this shell; files were written with the editor tool instead.
+- Running pytest from inside `scripts/ingest/` breaks because `inspect.py` shadows the stdlib; run it from the repo root.
+
+**Next**
+- Phase 3: VESTA system prompt, make_chart + ui_action, the three providers, agent loop, grounding, Offline mode, engine router, `/api/vesta*`, dashboard shell with the model menu.
 
 ### Phase 1 done
 **Done**

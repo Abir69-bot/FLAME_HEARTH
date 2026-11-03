@@ -13,7 +13,7 @@ Unit conversions used everywhere:
 | kPa | psi | × 0.145038 |
 | mole fraction | % | × 100 |
 
-Unknown value → `null`. Values that come from a document rather than the row are marked in
+`source_row` is the spreadsheet row number (header = row 1). Unknown value → `null`. Values that come from a document rather than the row are marked in
 `notes` with the page they come from. Extra field `flags: string[]` (not in the base model) records
 machine-readable data-quality marks: `duplicate_row`, `range_check_failed:<check>`, `layout_shifted`,
 `conditions_from_doc`.
@@ -99,7 +99,7 @@ Row 13 (FLEX 1220) has O2 0.21 + N2 0.76 = 0.97 → kept, noted.
 
 | CSV column | Clean field | Notes |
 |---|---|---|
-| (row number) | `source_row` | `test_id` = `SPICE-001…` |
+| (row number) | `source_row` | `test_id` = `SPICE-001…`; 34 rows are exact copies of an earlier row → flagged `duplicate_row` |
 | GMT date | notes | day of year 2009 (45 = 14 Feb 2009, SPICE_Report p19) |
 | GMT ignition, GMT Flame Off | notes | some use "14.48.19" format |
 | Fuel | `fuel`, `diluent` | "75 % Propylene" → fuel "propylene (75% in N2)", diluent "N2" (SPICE_Report p20) |
@@ -129,9 +129,9 @@ within 19–24%" (p19). These rows get the flag `conditions_from_doc`. `measurem
 - **Q1 (ACME inverse flow columns):** the two inverse-row flow values (e.g. 1.5 and 5.59) always keep a
   ratio near 3.72. They look like the oxidizer and O2 (or fuel-equivalent) flow in different units, but the
   PDFs do not label them. Plan: store both raw in notes, use neither as a number in charts.
-- **Q2 (SPICE conditions):** OK to treat every SPICE row as 21% O2 at 14.65 psi with the
-  `conditions_from_doc` flag and the p20 citation? (Default: yes.)
-- **Q3 (CFI duplicates):** 8 rows are exact copies. Default: keep them in tests.json, flag the second copy
-  `duplicate_row`, exclude flagged rows from counts and envelope checks.
+- **Q2 (SPICE conditions) — decided:** every SPICE row is 21% O2 at 14.65 psi with the
+  `conditions_from_doc` flag and the p20 citation.
+- **Q3 (duplicates) — decided:** exact copies are kept in tests.json, the later copy is flagged `duplicate_row`
+  and excluded from counts, envelope checks, ranking, gaps and the map (CFI 8 rows, SPICE 34 rows).
 - **Q4 (ACME campaigns):** the ACME table is only CFI-G. BRE and E-FIELD Flames appear in the PDFs only as
   text (searchable in docs), not as table rows.
