@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useHearth } from "@/lib/store";
 import type { TestRecord } from "@/lib/types";
 import { IconClose } from "./Icons";
@@ -26,6 +26,8 @@ const FIELDS: [keyof TestRecord, string, string?][] = [
   ["outcome", "Outcome"],
 ];
 
+const METRIC_LABEL: Record<string, string> = { burn_time_s: "Burn time (s)", hc_fuel_rate_mg_s: "HC fuel rate (mg/s)" };
+
 /** Shared details drawer for one test (opened from the map, the table, sources or VESTA). */
 export function TestDrawer() {
   const id = useHearth((s) => s.openTestId);
@@ -33,6 +35,11 @@ export function TestDrawer() {
   const setDraft = useHearth((s) => s.setDraft);
   const [data, setData] = useState<Detail | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (id) setTimeout(() => closeRef.current?.focus(), 30);
+  }, [id]);
 
   useEffect(() => {
     if (!id) return;
@@ -61,7 +68,7 @@ export function TestDrawer() {
             <p className="font-mono text-xs text-muted">Test details</p>
             <h2 className="font-head text-xl font-bold">{id}</h2>
           </div>
-          <button type="button" onClick={() => openTest(null)} className="rounded p-1 text-muted hover:bg-raised hover:text-text" aria-label="Close">
+          <button ref={closeRef} type="button" onClick={() => openTest(null)} className="rounded p-1 text-muted hover:bg-raised hover:text-text" aria-label="Close">
             <IconClose />
           </button>
         </div>
@@ -85,7 +92,7 @@ export function TestDrawer() {
               <dd>{data.derived.flow_regime.regime}</dd>
               {t.key_metric_name && (
                 <>
-                  <dt className="text-muted">{t.key_metric_name}</dt>
+                  <dt className="text-muted">{METRIC_LABEL[t.key_metric_name] ?? t.key_metric_name}</dt>
                   <dd className="font-mono">{t.key_metric_value ?? "missing"}</dd>
                 </>
               )}
@@ -98,6 +105,19 @@ export function TestDrawer() {
               <h3 className="mb-1 text-sm font-semibold">Sensors & measurements</h3>
               <p className="text-xs text-muted">{[...t.sensors, ...t.measurements].join(" · ") || "missing"}</p>
             </section>
+            {Object.keys(t.extra).length > 0 && (
+              <section className="mt-3">
+                <h3 className="mb-1 text-sm font-semibold">All recorded values (raw)</h3>
+                <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-xs">
+                  {Object.entries(t.extra).map(([k, v]) => (
+                    <div key={k} className="contents">
+                      <dt className="text-muted">{k.replace(/_/g, " ")}</dt>
+                      <dd className="font-mono">{v == null ? <span className="text-muted">missing</span> : String(v)}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            )}
             {t.notes && (
               <section className="mt-3">
                 <h3 className="mb-1 text-sm font-semibold">Notes</h3>

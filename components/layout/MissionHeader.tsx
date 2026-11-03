@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { getMission } from "@/lib/missions";
 import { useHearth } from "@/lib/store";
+import { CountUp } from "@/components/ui/CountUp";
 
 interface Calc {
   po2: { value: number };
@@ -48,7 +49,7 @@ export function MissionHeader() {
       ]
     : [];
   return (
-    <section aria-label="Active mission" className="rounded-xl border border-line bg-panel p-4">
+    <section aria-label="Active mission" className="animate-fadeUp rounded-xl border border-line bg-panel p-4">
       <div className="flex flex-wrap items-center gap-2">
         <h2 className="font-head text-lg font-semibold">{m.name}</h2>
         {m.demo && <span className="rounded border border-warn/60 px-1.5 text-[10px] uppercase text-warn">demo scenario</span>}
@@ -63,7 +64,7 @@ export function MissionHeader() {
               <>
                 <dt className="text-[11px] text-muted">{label}</dt>
                 <dd className="font-mono text-xl">
-                  {value}
+                  <CountUp value={Number(value)} />
                   <span className="ml-1 text-xs text-muted">{unit}</span>
                 </dd>
               </>

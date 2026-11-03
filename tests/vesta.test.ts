@@ -302,7 +302,7 @@ describe("engines endpoint", () => {
     expect(isRealKey("")).toBe(false);
     expect(isRealKey("PASTE_HERE")).toBe(false);
     expect(cleanModel("claude-sonnet-5-5# VESTA AI keys")).toBe("claude-sonnet-5-5");
-    expect(listEngines({}).filter((e) => e.available).map((e) => e.id)).toEqual(["auto", "offline"]);
+    expect(listEngines({} as NodeJS.ProcessEnv).filter((e) => e.available).map((e) => e.id)).toEqual(["auto", "offline"]);
   });
 });
 

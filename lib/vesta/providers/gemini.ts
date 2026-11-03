@@ -1,4 +1,4 @@
-import { GoogleGenAI, type Content, type FunctionDeclaration } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel, type Content, type FunctionDeclaration } from "@google/genai";
 import { EngineError, type ChatSession, type HistoryMessage, type Provider, type ProviderReply, type ToolResultMessage, type ToolSpec } from "./types";
 
 const MAX_TOKENS = 4000;
@@ -27,6 +27,8 @@ export function geminiProvider(apiKey: string, model: string): Provider {
               tools: [{ functionDeclarations }],
               maxOutputTokens: MAX_TOKENS,
               temperature: 0.2,
+              // keep answers fast: low thinking on Gemini 3 models (ignored by older ones)
+              ...(/gemini-(3|flash-latest|flash-lite-latest|pro-latest)/.test(model) ? { thinkingConfig: { thinkingLevel: ThinkingLevel.LOW } } : {}),
               abortSignal: signal,
             },
           });

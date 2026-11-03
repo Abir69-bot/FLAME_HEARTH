@@ -1,11 +1,31 @@
 # HEARTH progress
 
 ## Status
-- Next phase: 4 (waiting for the user's "go"; the user wants a report + "go" after every phase)
+- Next phase: 5 (waiting for the user's "go"; the user wants a report + "go" after every phase)
 - Live URL: https://project-hearth-five.vercel.app
 - AI engines with keys: Groq and Gemini (in `.env.local` and on Vercel, Production + Preview, added after the user's permission). Claude key empty.
 
 ## Log
+
+### Phase 4 done
+**Done**
+- GEMINI_MODEL changed to `gemini-flash-latest` (user's choice) in `.env.local` and on Vercel (Production + Preview). Gemini 3 models now run with low thinking level.
+- Overview (`/`): mission header with envelope pill and count-up KPI tiles (O2, pressure, pO2, × ISS, × Earth air, tests in envelope; numbers from `POST /api/calc`); habitat relevance map (`components/charts/HabitatMap.tsx`): ECharts scatter of all 847 countable tests, x = pressure, y = O2, colour per investigation, identical conditions merged (size = count), dashed constant-pO2 curve O2 = 100 × 3.087 / P, shaded Moon base / rover zone (30–34% O2, 8.2–10.2 psi), ISS / Moon base / Spacesuit diamonds, pulsing active-mission marker, wheel zoom, rich tooltips, click → details drawer, VESTA-highlighted tests glow (with "clear"), "not plotted" list; ranking bars (`RankBars.tsx`) with stacked score parts and reasons on hover; investigation key; pinned VESTA charts.
+- Explorer (`/explorer`): investigation toggles, fuel-phase select (solid → explains the data gap), O2 range sliders, debounced search, sortable paged table (duplicates hidden, failed range checks in amber, keyboard accessible rows), tests-per-campaign bars and O2 histogram that follow the filters.
+- Details drawer: every field, pO2 + ratio, flow regime, key metric with units, source file + row, flags, sensors & measurements, all raw recorded values, notes, related PDF passages, "Ask VESTA about this test", Esc / backdrop close, focus moves into the drawer.
+- Motion: fade-up entries, slide-in drawer, count-ups, pulsing mission marker and highlight ripples, chart entry animation; all off under prefers-reduced-motion. `EChart` wrapper now resizes with its box (ResizeObserver).
+- Checked at 400 px (iframe), 1024 px and 1440 px.
+
+**Decisions**
+- Map merges tests at identical O2/pressure into one point (SPICE's 435 rows share the documented 21% / 14.65 psi) instead of jittering real data.
+- Pressure axis is linear 0–80 psi (all data and missions fit).
+
+**Problems**
+- Gemini (`gemini-flash-latest`) still returned 503 / timeouts during testing (Google capacity); VESTA falls back to Groq / Offline.
+- Headless Edge screenshots at exactly 1024 px catch charts before their resize; real browsers resize via ResizeObserver (verified canvas widths at 1100 and 1440 px).
+
+**Next**
+- Phase 5: Compare, safety rules + safety_audit, Safety & gaps page, Lab, DEMO mode, About.
 
 ### Phase 3 done
 **Done**
