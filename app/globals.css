@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #070b14;
+  --panel: #0d1322;
+  --raised: #131b2e;
+  --line: #1f2a44;
+  --text: #e8ecf6;
+  --muted: #97a3bc;
+  --ember: #ff7a2f;
+  --ember-soft: #ffb98a;
+  --acme: #4cc9f0;
+  --cfi: #a78bfa;
+  --spice: #5ee6a8;
+  --ok: #5ee6a8;
+  --warn: #ffc857;
+  --bad: #ff5d6c;
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-head), system-ui, sans-serif;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ember);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(255, 122, 47, 0.35);
+}
+
+* {
+  scrollbar-color: var(--line) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
