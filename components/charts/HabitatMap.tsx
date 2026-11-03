@@ -50,6 +50,7 @@ export function HabitatMap({ height = 420 }: { height?: number }) {
   const missionId = useHearth((s) => s.missionId);
   const highlight = useHearth((s) => s.highlightIds);
   const openTest = useHearth((s) => s.openTest);
+  const labRows = useHearth((s) => s.labRows);
   const reduce = useReducedMotion();
 
   useEffect(() => {
@@ -74,7 +75,7 @@ export function HabitatMap({ height = 420 }: { height?: number }) {
       backgroundColor: "transparent",
       animationDuration: 800,
       grid: { left: 52, right: 18, top: 36, bottom: 48 },
-      legend: { top: 0, textStyle: { color: "#97A3BC" }, itemWidth: 10, itemHeight: 10, data: ["ACME", "CFI", "SPICE", "ISS pO2 (3.087 psi)", "Missions"] },
+      legend: { top: 0, textStyle: { color: "#97A3BC" }, itemWidth: 10, itemHeight: 10, data: ["ACME", "CFI", "SPICE", "ISS pO2 (3.087 psi)", "Missions", ...(labRows.length ? ["My data (not NASA)"] : [])] },
       tooltip: {
         trigger: "item",
         backgroundColor: "#131B2E",
@@ -137,6 +138,21 @@ export function HabitatMap({ height = 420 }: { height?: number }) {
           data: refMissions.map((m) => ({ name: m.short, value: [m.pressure_psi, m.o2_pct], desc: `${m.o2_pct}% O2 at ${m.pressure_psi} psi` })),
           z: 4,
         },
+        ...(labRows.length
+          ? [
+              {
+                name: "My data (not NASA)",
+                type: "scatter",
+                symbol: "triangle",
+                symbolSize: 10,
+                itemStyle: { color: "#FFC857", borderColor: "#070B14", borderWidth: 0.5 },
+                data: labRows
+                  .filter((r) => r.o2_pct != null && r.pressure_psi != null && !r.problems.length)
+                  .map((r) => ({ name: r.label, value: [r.pressure_psi, r.o2_pct], desc: `Your uploaded row (not NASA data): ${r.o2_pct}% O2 at ${r.pressure_psi} psi` })),
+                z: 4,
+              },
+            ]
+          : []),
         ...(highlighted.length
           ? [
               {
@@ -167,7 +183,7 @@ export function HabitatMap({ height = 420 }: { height?: number }) {
           : []),
       ],
     };
-  }, [data, missionId, highlight, reduce]);
+  }, [data, missionId, highlight, reduce, labRows]);
 
   const onEvents = useMemo(
     () => ({

@@ -62,6 +62,22 @@ function truncate(s: string): string {
 
 const EVIDENCE_TOOLS = new Set(["envelope_check", "nearest_tests"]);
 
+/** These tools always move the dashboard, in every engine, even if the model forgets ui_action. */
+export const AUTO_VIEW: Record<string, UiEvent> = {
+  compare: { action: "go_view", view: "compare", path: "/compare" },
+  safety_audit: { action: "go_view", view: "safety", path: "/safety" },
+  gap_finder: { action: "go_view", view: "safety", path: "/safety" },
+};
+
+export function withAutoView(ui: UiEvent[], toolsUsed: string[], compareArgs?: string[]): UiEvent[] {
+  if (ui.some((u) => u.action === "go_view")) return ui;
+  const tool = [...toolsUsed].reverse().find((t) => AUTO_VIEW[t]);
+  if (!tool) return ui;
+  const ev = { ...AUTO_VIEW[tool] };
+  if (tool === "compare" && compareArgs?.length) ev.compare = compareArgs;
+  return [...ui, ev];
+}
+
 export async function runAgent(input: AgentInput): Promise<AgentOutput> {
   const { provider, history, emit } = input;
   const timeout = input.timeoutMs ?? PROVIDER_TIMEOUT_MS;
@@ -81,6 +97,7 @@ export async function runAgent(input: AgentInput): Promise<AgentOutput> {
   let invalid = 0;
   let askedFix = false;
   let calls = 0;
+  let compareArgs: string[] | undefined;
 
   for (;;) {
     if (++calls > MAX_TOOL_ROUNDS + 3) throw new EngineError("other", "too many model calls");
@@ -103,6 +120,7 @@ export async function runAgent(input: AgentInput): Promise<AgentOutput> {
         const payload = truncate(JSON.stringify({ ok: res.ok, data: res.data, sources: res.sources, confidence: res.confidence, error: res.error }));
         if (res.ok) {
           toolsUsed.push(call.name);
+          if (call.name === "compare") compareArgs = (call.args as { investigations?: string[] })?.investigations;
           collectNumbers(payload, known);
           sources.push(...res.sources);
           if (res.confidence) (EVIDENCE_TOOLS.has(call.name) ? evidence : otherConf).push(res.confidence);
@@ -138,6 +156,6 @@ export async function runAgent(input: AgentInput): Promise<AgentOutput> {
       confidence = lowerConfidence(confidence, "extrapolated");
       note = UNVERIFIED_NOTE;
     }
-    return { text: finalText, confidence, confidenceNote: note, sources: dedupeSources(sources), charts, ui, toolsUsed };
+    return { text: finalText, confidence, confidenceNote: note, sources: dedupeSources(sources), charts, ui: withAutoView(ui, toolsUsed, compareArgs), toolsUsed };
   }
 }

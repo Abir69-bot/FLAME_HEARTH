@@ -12,6 +12,15 @@ export interface Step {
   summary: string;
 }
 
+/** A row uploaded in My data lab. Lives in memory only; never mixed into NASA tables. */
+export interface LabRow {
+  label: string;
+  o2_pct: number | null;
+  pressure_psi: number | null;
+  flow_cm_s: number | null;
+  problems: string[];
+}
+
 export interface VestaMessage {
   id: string;
   role: "user" | "vesta";
@@ -39,6 +48,8 @@ interface HearthState {
   messages: VestaMessage[];
   busy: boolean;
   draft: string;
+  labRows: LabRow[];
+  setLabRows: (rows: LabRow[]) => void;
   setMission: (id: string) => void;
   setEngine: (e: EngineChoice) => void;
   setLevel: (l: Level) => void;
@@ -62,6 +73,8 @@ export const useHearth = create<HearthState>((set) => ({
   messages: [],
   busy: false,
   draft: "",
+  labRows: [],
+  setLabRows: (labRows) => set({ labRows }),
   setMission: (missionId) => set({ missionId }),
   setEngine: (engine) => set({ engine }),
   setLevel: (level) => set({ level }),

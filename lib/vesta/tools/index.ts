@@ -8,6 +8,7 @@ import { nearestTestsTool } from "./nearest_tests";
 import { physicsCalc } from "./physics_calc";
 import { queryData } from "./query_data";
 import { rankInvestigationsTool } from "./rank_investigations";
+import { safetyAuditTool } from "./safety_audit";
 import { searchDocsTool } from "./search_docs";
 import type { ToolContext, ToolDef } from "./types";
 
@@ -21,6 +22,7 @@ export const DATA_TOOLS: ToolDef[] = [
   compareTool,
   rankInvestigationsTool,
   gapFinderTool,
+  safetyAuditTool,
 ] as unknown as ToolDef[];
 
 /** Everything VESTA can call: data tools + make_chart + ui_action. */

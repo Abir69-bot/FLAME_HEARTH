@@ -1,11 +1,32 @@
 # HEARTH progress
 
 ## Status
-- Next phase: 5 (waiting for the user's "go"; the user wants a report + "go" after every phase)
+- Next phase: 6 (waiting for the user's "go"; the user wants a report + "go" after every phase)
 - Live URL: https://project-hearth-five.vercel.app
 - AI engines with keys: Groq and Gemini (in `.env.local` and on Vercel, Production + Preview, added after the user's permission). Claude key empty.
 
 ## Log
+
+### Phase 5 done
+**Done**
+- `lib/safety.ts`: six rules — Prevention: oxygen enrichment, untested cabin materials; Detection: cool flames, smoke & soot; Suppression: still air & flow control, partial gravity. Each runs real queries, returns severity 0–100 with its formula string, confidence from evidence count (≥5 supported, 1–4 extrapolated, 0 no_data), evidence chips with file/row/page and an "Evidence suggests… / Evidence is missing…" guideline. `safety_audit` tool + `GET /api/safety`. 11 vitest tests (one per rule + audit + tool + radar + auto view).
+- Compare (`/compare`): pick 2–3 investigations (URL `?inv=`, follows VESTA), coverage radar (max O2, pressure span, flow span, fuel variety, sensor types, mission relevance; raw values + formula per axis in the tooltip; `coverageRadar` in lib/analysis.ts), grouped bars of mean O2 / pressure / airflow ("not recorded" where missing), overlay scatter, "Shared by all" and "Only in X" lists.
+- Safety & gaps (`/safety`): finding cards per category with animated severity bar, formula, confidence tag, evidence chips (open the test), guideline; O2 × pressure gap heatmap (count per cell, red "gap", active-mission cell outlined); missing fuel types, gravity levels, recommended experiments; "Uses on Earth" panel with PDF citations (ACME_Report p4, p68; CFI_Report p3; SPICE_Report p2, p7).
+- Lab (`/lab`): sliders + number boxes (O2, pressure, airflow), material picker (filters the tests used; solid → no data), live pO2 / ratios / flow regime / envelope / heuristic hazard index with parts, nearest 5 tests, scatter with all tests + nearest 5 + pulsing user point; CSV upload in the browser (`lib/csv.ts`: quotes, comments, column + unit detection, confirm-mapping step, range checks, memory only), rows shown as triangles in the lab and on the overview map; `public/sample_lab_data.csv` labelled as made-up example data; "Ask VESTA to assess".
+- DEMO mode (Lab page): simulated O2, pressure, pO2, airflow, smoke, temperature every 1.5 s with sparklines, DEMO hazard gauge, 90-second chart, "Run fire drill" (smoke/temperature up, airflow down, tiles red past DEMO limits, recovery), VESTA DEMO alert and closing message (badge "DEMO · simulated drill · not NASA data"; excluded from VESTA's history), event ticker. DEMO badge on every tile and panel.
+- About (`/about`): investigations + hardware, what each file holds, NASA PSI credit and links, limits, how VESTA works (engine chain + Offline mode).
+- VESTA moves the dashboard after compare / safety_audit / gap_finder in every engine (`withAutoView` in agent.ts; Offline uses safety_audit for safety questions). System prompt mentions safety_audit. 4 more eval questions (16 total). CSV tests. 86 vitest tests in total.
+
+**Decisions**
+- Severity values are HEARTH heuristics shown with their formulas; the audit's overall confidence is the condition's envelope confidence, lowered to extrapolated when any finding lacks data.
+- Cool-flame severity requires both O2 (±5 pp) and pressure (±2.5 psi) closeness to the recorded cool-flame tests (all at 29.4 psi), so the rover gets "extrapolated", not "supported".
+- DEMO lives on the Lab page (the nav has six fixed items).
+
+**Problems**
+- Gemini still overloaded during testing (falls back).
+
+**Next**
+- Phase 6: eval runner, NASA-judge review, hardening, polish + tour, README + demo script, v1.0 tag.
 
 ### Phase 4 done
 **Done**

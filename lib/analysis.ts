@@ -45,6 +45,50 @@ export function compareInvestigations(invs: Investigation[]) {
   return { investigations: invs, shared, only, conditions, sources };
 }
 
+// ------------------------------------------------------------- coverage radar
+export const COVERAGE_AXES = [
+  { key: "max_o2", label: "Max O2", unit: "%", formula: "highest O2 % tested (axis 0–100)" },
+  { key: "pressure_span", label: "Pressure span", unit: "psi", formula: "max − min pressure tested ÷ widest span of the three × 100" },
+  { key: "flow_span", label: "Flow span", unit: "cm/s", formula: "max − min airflow tested ÷ widest span × 100 (0 = not recorded)" },
+  { key: "fuel_variety", label: "Fuel variety", unit: "fuels", formula: "distinct fuels ÷ most fuels of the three × 100" },
+  { key: "sensor_types", label: "Sensor types", unit: "types", formula: "distinct sensor types ÷ most of the three × 100" },
+  { key: "mission_relevance", label: "Mission relevance", unit: "/100", formula: "rank_investigations score for the active mission (0–100)" },
+] as const;
+export type CoverageKey = (typeof COVERAGE_AXES)[number]["key"];
+
+export function coverageRadar(missionId?: string) {
+  const m = getMission(missionId) ?? getMission("lunar-rover")!;
+  const ranking = rankInvestigations(m);
+  const raw: Record<string, Record<CoverageKey, number>> = {};
+  for (const inv of INVESTIGATIONS) {
+    const ts = countable().filter((t) => t.investigation === inv);
+    const o2 = stats(ts.map((t) => t.o2_pct));
+    const p = stats(ts.map((t) => t.pressure_psi));
+    const f = stats(ts.map((t) => t.flow_cm_s));
+    raw[inv] = {
+      max_o2: o2.max ?? 0,
+      pressure_span: p.max != null && p.min != null ? round(p.max - p.min, 3) : 0,
+      flow_span: f.max != null && f.min != null ? round(f.max - f.min, 3) : 0,
+      fuel_variety: values(ts, "fuel").length,
+      sensor_types: values(ts, "sensors").length,
+      mission_relevance: ranking.find((r) => r.investigation === inv)?.score ?? 0,
+    };
+  }
+  const maxOf = (k: CoverageKey) => Math.max(...INVESTIGATIONS.map((i) => raw[i][k]), 1e-9);
+  const norm: Record<string, Record<CoverageKey, number>> = {};
+  for (const inv of INVESTIGATIONS) {
+    norm[inv] = {
+      max_o2: round(raw[inv].max_o2, 1),
+      pressure_span: round((100 * raw[inv].pressure_span) / maxOf("pressure_span"), 1),
+      flow_span: round((100 * raw[inv].flow_span) / maxOf("flow_span"), 1),
+      fuel_variety: round((100 * raw[inv].fuel_variety) / maxOf("fuel_variety"), 1),
+      sensor_types: round((100 * raw[inv].sensor_types) / maxOf("sensor_types"), 1),
+      mission_relevance: raw[inv].mission_relevance,
+    };
+  }
+  return { mission: m.id, axes: COVERAGE_AXES, raw, norm };
+}
+
 // ------------------------------------------------------------- rank
 export const RANK_WEIGHTS = { proximity: 40, o2_coverage: 20, pressure_coverage: 20, envelope_tests: 20 } as const;
 export const RANK_O2_GAP_FULL = 20; // pp outside the tested O2 range that zeroes O2 coverage

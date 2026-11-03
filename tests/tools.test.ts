@@ -4,7 +4,7 @@ import { DATA_TOOLS, runTool } from "@/lib/vesta/tools";
 describe("data tools", () => {
   it("every tool has a name, description and zod input", () => {
     expect(DATA_TOOLS.map((t) => t.name).sort()).toEqual(
-      ["compare", "envelope_check", "gap_finder", "nearest_tests", "physics_calc", "query_data", "rank_investigations", "search_docs"].sort(),
+      ["compare", "envelope_check", "gap_finder", "nearest_tests", "physics_calc", "query_data", "rank_investigations", "safety_audit", "search_docs"].sort(),
     );
   });
 
@@ -47,6 +47,7 @@ describe("data tools", () => {
       ["compare", { investigations: ["ACME", "SPICE"] }],
       ["rank_investigations", { mission: "lunar-rover" }],
       ["gap_finder", {}],
+      ["safety_audit", { mission: "lunar-rover" }],
     ];
     for (const [name, args] of calls) {
       const r = await runTool(name, args);

@@ -321,6 +321,7 @@ describe("offline mode", () => {
     expect(detectIntent("Explain SPICE-001")).toBe("explain_test");
     expect(detectIntent("Compare ACME and CFI")).toBe("compare");
     expect(detectIntent("What data is missing for the Moon base?")).toBe("gaps");
+    expect(detectIntent("Which conditions have never been tested?")).toBe("gaps");
     expect(detectIntent("Which investigation is most relevant for the ISS?")).toBe("rank");
     expect(detectIntent("Run a safety audit")).toBe("safety");
     expect(detectIntent("Is 34% at 8.2 psi tested?")).toBe("assess");
@@ -333,7 +334,7 @@ describe("offline mode", () => {
     ["Compare ACME and SPICE", ["compare", "make_chart", "ui_action"]],
     ["What data is missing for the lunar rover?", ["gap_finder", "ui_action"]],
     ["Which investigation is most relevant for the Moon base?", ["rank_investigations", "make_chart", "ui_action"]],
-    ["Run a safety audit for the rover", ["physics_calc", "envelope_check", "nearest_tests", "gap_finder"]],
+    ["Run a safety audit for the rover", ["physics_calc", "envelope_check", "nearest_tests", "safety_audit"]],
     ["Explain ACME-CFIG-128", ["query_data", "physics_calc", "ui_action"]],
     ["What is a cool flame?", ["search_docs"]],
   ];

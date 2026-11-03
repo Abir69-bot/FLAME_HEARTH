@@ -90,3 +90,35 @@ questions:
     facts: ["no_data|no data|not tested|gap|won't predict|cannot predict|do not predict"]
     confidence: no_data
     offline: false
+
+  # ---- Phase 5 additions
+  - id: q13-safety-audit-rover
+    mission: lunar-rover
+    question: "Run a fire-safety audit for the lunar rover cabin."
+    expected_tools: [safety_audit]
+    facts: ["Prevention|prevention", "Detection|detection", "Suppression|suppression", "evidence suggests|Evidence suggests|Evidence is missing"]
+    expected_view: safety
+    offline: true
+
+  - id: q14-compare-coverage
+    mission: lunar-base
+    question: "Compare ACME and CFI coverage for a Moon base."
+    expected_tools: [compare]
+    facts: ["ACME", "CFI", "liquid|droplet"]
+    expected_view: compare
+    offline: true
+
+  - id: q15-cool-flame-detection
+    mission: iss
+    question: "Why are cool flames a detection problem, and how many ACME tests recorded one?"
+    expected_tools: [safety_audit, query_data, search_docs]
+    facts: [7, "cool"]
+    offline: false
+
+  - id: q16-gaps-view
+    mission: spacesuit
+    question: "Which oxygen and pressure conditions have never been tested?"
+    expected_tools: [gap_finder]
+    facts: ["gap|untested|no tests"]
+    expected_view: safety
+    offline: true

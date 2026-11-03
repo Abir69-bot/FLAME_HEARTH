@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { apiError, json } from "@/lib/api";
-import { allTests, compact } from "@/lib/data";
+import { compact, filterTests } from "@/lib/data";
 import { envelopeCheck, flowRegime, hazardIndex, nearestTests, o2VsEarth, pO2Calc, ratioToISS } from "@/lib/physics";
 
 export const runtime = "nodejs";
@@ -9,6 +9,7 @@ const Body = z.object({
   o2_pct: z.number().min(0).max(100),
   pressure_psi: z.number().positive().max(200),
   flow_cm_s: z.number().min(-10).max(500).nullable().optional(),
+  fuel_phase: z.enum(["gas", "liquid", "solid"]).optional(),
 });
 
 export async function POST(req: Request) {
@@ -20,8 +21,9 @@ export async function POST(req: Request) {
   }
   const p = Body.safeParse(body);
   if (!p.success) return apiError(p.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; "));
-  const { o2_pct, pressure_psi, flow_cm_s } = p.data;
-  const env = envelopeCheck(o2_pct, pressure_psi, allTests());
+  const { o2_pct, pressure_psi, flow_cm_s, fuel_phase } = p.data;
+  const pool = filterTests({ fuel_phase });
+  const env = envelopeCheck(o2_pct, pressure_psi, pool);
   return json(
     {
       inputs: p.data,
@@ -31,7 +33,8 @@ export async function POST(req: Request) {
       flow_regime: flowRegime(flow_cm_s),
       envelope: { status: env.status, count: env.count, by_investigation: env.by_investigation, rule: env.rule, confidence: env.confidence },
       hazard_index: hazardIndex(o2_pct, pressure_psi, flow_cm_s, env.status),
-      nearest: nearestTests(o2_pct, pressure_psi, allTests(), 5, flow_cm_s).map((h) => ({ distance: h.distance, ...compact(h.test) })),
+      nearest: nearestTests(o2_pct, pressure_psi, pool, 5, flow_cm_s).map((h) => ({ distance: h.distance, ...compact(h.test) })),
+      material: fuel_phase ?? "any",
       source: { file: "lib/physics.ts", note: "tested formulas" },
     },
     { cache: false },

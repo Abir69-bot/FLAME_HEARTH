@@ -62,7 +62,7 @@ export function detectIntent(msg: string, p: Parsed = parseMessage(msg)): Intent
   if (!t || /^(help|\?|what can you do|hi|hello|hey)\b/.test(t)) return "help";
   if (p.test_ids.length) return "explain_test";
   if (/\bcompar|\bversus\b|\bvs\.?\b|differen/.test(t) || p.investigations.length >= 2) return "compare";
-  if (/\bgaps?\b|missing|untested|not (been )?tested|no data|lack/.test(t)) return "gaps";
+  if (/\bgaps?\b|missing|untested|(not|never) (been )?tested|no data|lack/.test(t)) return "gaps";
   if (/\brank|most relevant|relevan|which investigation|best (investigation|data)/.test(t)) return "rank";
   if (/safety|audit|hazard|fire risk|danger|\brisk/.test(t)) return "safety";
   if (p.o2_pct != null || p.pressure_psi != null || /po2|partial pressure|assess|condition|envelope|tested|safe|cabin/.test(t) || p.mission) return "assess";
@@ -165,12 +165,13 @@ async function assess(c: Ctx, p: Parsed, level: Level, safetyMode: boolean): Pro
     c.conf.push("extrapolated");
   }
   if (safetyMode) {
-    const gaps = (await call(c, "gap_finder", { mission: m?.id })).data as { recommendations: { gap: string; suggestion: string }[] };
-    out.push("Safety view (evidence, not NASA rules):");
-    out.push(`• Prevention: ${enriched ? "evidence suggests limiting flammable materials and ignition sources in enriched O2" : "O2 is at or below Earth air, the best-tested region"}.`);
-    out.push("• Detection: SPICE measured smoke points (where gas flames start to emit soot), which matters for smoke-detector response; the dataset has no detector tests.");
-    out.push("• Suppression: no suppression tests are in this dataset.");
-    for (const r of gaps.recommendations.slice(0, 2)) out.push(`• Gap: ${r.gap} — ${r.suggestion}`);
+    const audit = (await call(c, "safety_audit", p.o2_pct != null && p.pressure_psi != null ? { o2_pct: o2, pressure_psi: pr, mission: m?.id } : { mission: m?.id })).data as {
+      findings: { category: string; title: string; severity: number; confidence: string; guideline: string }[];
+    };
+    out.push("Safety audit (evidence, not NASA rules; severity is a HEARTH heuristic 0–100):");
+    for (const f of audit.findings) {
+      out.push(`• ${f.category[0].toUpperCase()}${f.category.slice(1)} — ${f.title} (severity ${f.severity}, ${f.confidence.replace("_", " ")}): ${f.guideline}`);
+    }
     c.ui.push({ action: "go_view", view: "safety", path: "/safety" });
   }
   return out;

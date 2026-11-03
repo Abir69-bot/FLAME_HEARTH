@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { apiError, json } from "@/lib/api";
-import { compareInvestigations } from "@/lib/analysis";
+import { compareInvestigations, coverageRadar } from "@/lib/analysis";
 import { INVESTIGATIONS, type Investigation } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -11,5 +11,5 @@ export function GET(req: NextRequest) {
   if (inv.length < 2 || inv.length > 3 || inv.some((i) => !INVESTIGATIONS.includes(i as Investigation))) {
     return apiError("inv must list 2 or 3 of ACME, CFI, SPICE");
   }
-  return json(compareInvestigations(inv as Investigation[]));
+  return json({ ...compareInvestigations(inv as Investigation[]), coverage: coverageRadar(req.nextUrl.searchParams.get("mission") ?? undefined) });
 }
