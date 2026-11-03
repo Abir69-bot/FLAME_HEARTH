@@ -2,6 +2,8 @@ import type { ToolResult } from "@/lib/types";
 import { compareTool } from "./compare";
 import { envelopeCheckTool } from "./envelope_check";
 import { gapFinderTool } from "./gap_finder";
+import { makeChartTool } from "./make_chart";
+import { uiActionTool } from "./ui_action";
 import { nearestTestsTool } from "./nearest_tests";
 import { physicsCalc } from "./physics_calc";
 import { queryData } from "./query_data";
@@ -9,7 +11,7 @@ import { rankInvestigationsTool } from "./rank_investigations";
 import { searchDocsTool } from "./search_docs";
 import type { ToolContext, ToolDef } from "./types";
 
-/** Data tools (Phase 2). make_chart and ui_action are added in Phase 3. */
+/** Data tools: read the NASA data, the PDFs or the tested formulas. */
 export const DATA_TOOLS: ToolDef[] = [
   queryData,
   searchDocsTool,
@@ -21,12 +23,15 @@ export const DATA_TOOLS: ToolDef[] = [
   gapFinderTool,
 ] as unknown as ToolDef[];
 
-export function findTool(name: string, tools: ToolDef[] = DATA_TOOLS): ToolDef | undefined {
+/** Everything VESTA can call: data tools + make_chart + ui_action. */
+export const VESTA_TOOLS: ToolDef[] = [...DATA_TOOLS, makeChartTool, uiActionTool] as unknown as ToolDef[];
+
+export function findTool(name: string, tools: ToolDef[] = VESTA_TOOLS): ToolDef | undefined {
   return tools.find((t) => t.name === name);
 }
 
 /** Validate arguments with zod, then run. Never throws. */
-export async function runTool(name: string, args: unknown, ctx: ToolContext = {}, tools: ToolDef[] = DATA_TOOLS): Promise<ToolResult> {
+export async function runTool(name: string, args: unknown, ctx: ToolContext = {}, tools: ToolDef[] = VESTA_TOOLS): Promise<ToolResult> {
   const tool = findTool(name, tools);
   if (!tool) return { ok: false, data: null, sources: [], summary: `unknown tool ${name}`, error: "unknown_tool" };
   const parsed = tool.input.safeParse(args ?? {});

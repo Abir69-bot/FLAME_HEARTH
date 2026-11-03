@@ -1,0 +1,92 @@
+# VESTA eval questions. Run with scripts/run-evals.ts (Phase 6).
+# expected_tools: at least one of these must be called.
+# facts: strings or numbers that must appear in the answer (numbers allow rounding).
+# offline: true when Offline mode is expected to answer this question fully.
+questions:
+  - id: q01-po2-rover
+    mission: lunar-rover
+    question: "What is pO2 at 34% O2 and 8.2 psi?"
+    expected_tools: [physics_calc]
+    facts: [2.79]
+    confidence: supported
+    offline: true
+
+  - id: q02-iss-reference
+    mission: iss
+    question: "How does ISS cabin air compare with the ISS reference pO2?"
+    expected_tools: [physics_calc]
+    facts: [3.087]
+    offline: true
+
+  - id: q03-rover-envelope
+    mission: lunar-rover
+    question: "Is the lunar rover cabin atmosphere inside the tested NASA data?"
+    expected_tools: [envelope_check, nearest_tests]
+    facts: ["supported", 28]
+    confidence: extrapolated
+    offline: true
+
+  - id: q04-spacesuit-gap
+    mission: spacesuit
+    question: "Do we have test data for a spacesuit at 100% O2 and 4.3 psi?"
+    expected_tools: [envelope_check, nearest_tests, gap_finder]
+    facts: ["no_data|no data|no tests|not tested|gap"]
+    confidence: no_data
+    offline: true
+
+  - id: q05-rank-moon-base
+    mission: lunar-base
+    question: "Which investigation is most relevant for the Moon base?"
+    expected_tools: [rank_investigations]
+    facts: ["ACME", 80.3]
+    offline: true
+
+  - id: q06-compare-acme-spice
+    mission: lunar-rover
+    question: "Compare ACME and SPICE"
+    expected_tools: [compare]
+    facts: ["ACME", "SPICE", 333]
+    offline: true
+
+  - id: q07-gaps-solids
+    mission: lunar-rover
+    question: "What data is missing for lunar habitats?"
+    expected_tools: [gap_finder]
+    facts: ["solid", "LUCI|FM2|partial gravity|lunar gravity"]
+    offline: true
+
+  - id: q08-explain-test
+    mission: lunar-rover
+    question: "Explain test ACME-CFIG-128"
+    expected_tools: [query_data, nearest_tests, search_docs]
+    facts: ["ethane", 34.081]
+    offline: true
+
+  - id: q09-cool-flame-topic
+    mission: iss
+    question: "What is a cool flame?"
+    expected_tools: [search_docs]
+    facts: ["cool"]
+    offline: true
+
+  - id: q10-cfi-oxygen-range
+    mission: iss
+    question: "What oxygen levels were tested in the CFI droplet experiments?"
+    expected_tools: [query_data]
+    facts: [17, 21]
+    offline: false
+
+  - id: q11-spice-conditions
+    mission: iss
+    question: "Under what pressure and oxygen did SPICE run, and where does that come from?"
+    expected_tools: [search_docs, query_data]
+    facts: [21, "SPICE_Report"]
+    offline: false
+
+  - id: q12-outside-range
+    mission: lunar-rover
+    question: "Predict the flame spread rate of cotton fabric at 40% O2 and 5 psi."
+    expected_tools: [envelope_check, gap_finder, nearest_tests]
+    facts: ["no_data|no data|not tested|gap|won't predict|cannot predict|do not predict"]
+    confidence: no_data
+    offline: false

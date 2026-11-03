@@ -1,11 +1,35 @@
 # HEARTH progress
 
 ## Status
-- Next phase: 3 (waiting for the user's "go"; the user wants a report + "go" after every phase)
+- Next phase: 4 (waiting for the user's "go"; the user wants a report + "go" after every phase)
 - Live URL: https://project-hearth-five.vercel.app
-- AI engines with keys: Groq and Gemini set in `.env.local`; Claude key empty. Vercel env vars NOT yet added (the tool permission was denied; see Phase 1 problems).
+- AI engines with keys: Groq and Gemini (in `.env.local` and on Vercel, Production + Preview, added after the user's permission). Claude key empty.
 
 ## Log
+
+### Phase 3 done
+**Done**
+- `lib/vesta/system-prompt.md` (model-agnostic: personality, 8 rules, 3 levels, reference atmospheres, tool guidance) + `prompt.ts` (adds active mission + level).
+- Tools: Phase 2 tools + `make_chart` (zod spec → server-built plain-JSON ECharts option; line/bar/scatter/radar/heatmap; ≤2000 points; every chart value must match an earlier tool result) + `ui_action` (go_view, set_mission, highlight_tests, open_test; ids and missions validated). Zod schemas converted once with zod-to-json-schema (`tools/schemas.ts`).
+- Providers behind one interface (`providers/types.ts`): `anthropic.ts` (@anthropic-ai/sdk, beta messages with `fallbacks: "default"` refusal fallback, effort medium, thinking blocks kept in history), `groq.ts` (openai SDK, Groq base URL, gpt-oss reasoning_effort low), `gemini.ts` (@google/genai function calling with JSON schema).
+- `agent.ts`: provider-agnostic tool loop (max 6 tool rounds, 20 s per call, 3 invalid calls → engine error), confidence = model tag capped by tool evidence. `grounding.ts`: numbers must match tool results / user message (rounding and % ↔ fraction allowed; ids, formulas, page/row refs ignored); one fix request, then "Some figures could not be verified." + extrapolated.
+- `offline.ts`: intent router (help, explain test, compare, gaps, rank, safety, assess, explain topic) + number/unit/test-id/mission extraction → same tools → templated answers; moves the dashboard (compare → /compare, gaps/safety → /safety, rank → overview, highlight/open tests).
+- `router.ts`: Auto = Claude → Groq → Gemini → Offline; a chosen engine first, then the chain. Fallback on missing key, 401/403, 404 model, 429, 5xx, timeout, tool-incapable model, invalid tool calls, refusal. Logs only the error kind. 10-minute cache. Fallback note ("Groq limit reached, answered with Offline mode").
+- API: `GET /api/vesta/engines` ({id,label,available} only), `POST /api/vesta` (SSE: engine, step, text, chart, ui, sources, confidence, done, error; Node runtime, maxDuration 60, message ≤ 2000 chars, one request per visitor), `POST /api/vesta/alert` (proactive alert, no AI).
+- Dashboard shell: sticky top bar (logo, mission chips, data status), left nav, zustand store, VESTA panel (canvas orb, Online/Thinking, model menu with "no key" options disabled, Student/Researcher/Engineer, live tool steps, streamed text, engine badge, fallback note, inline charts with "Pin to dashboard", source chips, confidence tag, quick prompts), test details drawer, mission header with KPI tiles, pinned-charts strip, proactive alert on mission change. Preferences in localStorage (wrapped in try/catch). Checked at 1440 px and 400 px.
+- 72 vitest tests (36 new: tool loop, event order, 6-round cap, make_chart/ui_action validation, grounding, every fallback case, cache, engines endpoint never leaks keys, every Offline intent with a grounding self-check). `evals/questions.yaml` with 12 questions. `scripts/probe-vesta.ts` dev probe (never prints keys).
+
+**Decisions**
+- Provider calls are not token-streamed: the full answer must pass the grounding check before the user sees any number, then it is streamed to the browser in small chunks.
+- Groq gpt-oss runs with low reasoning effort and 1500 output tokens to fit the free tier.
+
+**Problems**
+- Gemini: `gemini-2.5-flash` returns 404 "no longer available to new users" for this key, so Gemini always falls back. Newer models (`gemini-3.5-flash`, `gemini-3.8-flash`) exist for this key but were overloaded (503 "high demand") during testing. Needs the user's choice of GEMINI_MODEL.
+- Groq free tier: about 1–2 tool-using questions per minute before 429; the chain then answers with Offline mode.
+- Python heredoc edits silently failed once on an escaped `\n`; switched to the Edit tool for such changes.
+
+**Next**
+- Phase 4: overview map, ranking bars, explorer table + charts, full details drawer, motion.
 
 ### Phase 2 done
 **Done**

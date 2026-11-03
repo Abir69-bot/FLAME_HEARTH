@@ -19,7 +19,7 @@ export const queryDataInput = z.object({
   q: z.string().optional().describe("Free-text match on id, fuel, outcome, notes"),
   group_by: z.enum(GROUPS).optional().describe("Return counts and condition ranges per group"),
   sort: z.string().optional().describe("Field to sort by, prefix '-' for descending, e.g. '-o2_pct'"),
-  limit: z.number().int().min(1).max(50).optional().describe("Rows to return (default 10)"),
+  limit: z.number().int().min(1).max(50).optional().describe("Rows to return (default 8)"),
 });
 
 function condStats(ts: TestRecord[]) {
@@ -37,7 +37,7 @@ export const queryData = defineTool({
   input: queryDataInput,
   run(input) {
     const rows = sortTests(filterTests(input), input.sort ?? "test_id");
-    const limit = input.limit ?? 10;
+    const limit = input.limit ?? 8;
     let groups: ({ key: string; n: number } & ReturnType<typeof condStats>)[] | undefined;
     if (input.group_by) {
       const key = input.group_by;

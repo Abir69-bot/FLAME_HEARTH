@@ -3,6 +3,8 @@ import type { ToolResult } from "@/lib/types";
 
 export interface ToolContext {
   missionId?: string;
+  /** Set by the agent: true when a number appeared in an earlier tool result or the user's message. */
+  isKnownNumber?: (n: number) => boolean;
 }
 
 export interface ToolDef<S extends z.ZodTypeAny = z.ZodTypeAny> {

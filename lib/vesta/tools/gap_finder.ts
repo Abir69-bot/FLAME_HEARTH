@@ -19,6 +19,7 @@ export const gapFinderTool = defineTool({
         focus_cell: g.focus_cell,
         mission_gaps: g.mission_gaps.map(({ o2_bin, p_bin, missions }) => ({ o2_bin, p_bin, missions })),
         exploration_region_gaps: g.exploration_region_gaps.map(({ o2_bin, p_bin }) => ({ o2_bin, p_bin })),
+        exploration_region_gap_count: g.exploration_region_gaps.length,
         missing_fuel_phases: g.missing_fuel_phases,
         gravity_levels_tested: g.gravity_levels_tested,
         recommendations: g.recommendations,

@@ -4,6 +4,7 @@ const config: Config = {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./lib/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      screens: { vesta: "1180px" },
       colors: {
         bg: "var(--bg)",
         panel: "var(--panel)",
