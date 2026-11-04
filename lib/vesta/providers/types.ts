@@ -39,7 +39,7 @@ export interface HistoryMessage {
 }
 
 export interface Provider {
-  id: "claude" | "groq" | "gemini";
+  id: "claude" | "openrouter" | "groq" | "gemini";
   model: string;
   startSession(input: { system: string; history: HistoryMessage[]; tools: ToolSpec[] }): ChatSession;
 }

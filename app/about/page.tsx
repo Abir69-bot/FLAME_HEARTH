@@ -35,9 +35,10 @@ const FILES = [
 
 const ENGINES = [
   ["1. Claude", "Used when an Anthropic key is set. Best quality."],
-  ["2. Groq (free)", "openai/gpt-oss-120b through Groq's OpenAI-compatible API."],
-  ["3. Gemini (free)", "Google Gemini with function calling."],
-  ["4. Offline mode", "Always available. Rule-based: detects the intent, pulls numbers such as “34%” or “8.2 psi” from your message, calls the same tools and fills a template. No AI."],
+  ["2. OpenRouter (free)", "NVIDIA Nemotron 3.5 Super VL through OpenRouter's OpenAI-compatible API."],
+  ["3. Groq (free)", "openai/gpt-oss-120b through Groq's OpenAI-compatible API."],
+  ["4. Gemini (free)", "Google Gemini with function calling."],
+  ["5. Offline mode", "Always available. Rule-based: detects the intent, pulls numbers such as “34%” or “8.2 psi” from your message, calls the same tools and fills a template. No AI."],
 ];
 
 export default function AboutPage() {

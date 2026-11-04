@@ -6,6 +6,7 @@ import type { EngineChoice, EngineInfo } from "@/lib/vesta/engines";
 const FALLBACK: EngineInfo[] = [
   { id: "auto", label: "Auto (recommended)", available: true },
   { id: "claude", label: "Claude", available: false },
+  { id: "openrouter", label: "OpenRouter", available: false },
   { id: "groq", label: "Groq", available: false },
   { id: "gemini", label: "Gemini", available: false },
   { id: "offline", label: "Offline", available: true },

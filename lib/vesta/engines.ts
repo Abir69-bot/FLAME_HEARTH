@@ -1,13 +1,14 @@
 /** Engine configuration from environment variables. Never exposes key values. */
 
-export type EngineId = "claude" | "groq" | "gemini" | "offline";
+export type EngineId = "claude" | "openrouter" | "groq" | "gemini" | "offline";
 export type EngineChoice = EngineId | "auto";
 
-export const ENGINE_ORDER: EngineId[] = ["claude", "groq", "gemini", "offline"];
+export const ENGINE_ORDER: EngineId[] = ["claude", "openrouter", "groq", "gemini", "offline"];
 
 export const ENGINE_LABELS: Record<EngineChoice, string> = {
   auto: "Auto (recommended)",
   claude: "Claude",
+  openrouter: "OpenRouter",
   groq: "Groq",
   gemini: "Gemini",
   offline: "Offline",
@@ -15,18 +16,21 @@ export const ENGINE_LABELS: Record<EngineChoice, string> = {
 
 const DEFAULT_MODELS: Record<Exclude<EngineId, "offline">, string> = {
   claude: "claude-opus-5-5",
+  openrouter: "nvidia/nemotron-3.5-super-vl:free",
   groq: "openai/gpt-oss-120b",
   gemini: "gemini-2.5-flash",
 };
 
 const KEY_VARS: Record<Exclude<EngineId, "offline">, string> = {
   claude: "ANTHROPIC_API_KEY",
+  openrouter: "OPENROUTER_API_KEY",
   groq: "GROQ_API_KEY",
   gemini: "GEMINI_API_KEY",
 };
 
 const MODEL_VARS: Record<Exclude<EngineId, "offline">, string> = {
   claude: "ANTHROPIC_MODEL",
+  openrouter: "OPENROUTER_MODEL",
   groq: "GROQ_MODEL",
   gemini: "GEMINI_MODEL",
 };

@@ -46,7 +46,7 @@ const text = (t: string): ProviderReply => ({ text: t, toolCalls: [], stop: "end
 const tool = (name: string, args: unknown, id = `c-${name}`): ProviderReply => ({ text: "", toolCalls: [{ id, name, args }], stop: "tool_use" });
 const httpError = (status: number) => Object.assign(new Error(`status ${status}`), { status });
 
-async function run(deps: RouterDeps, message = "What is pO2 at 34% O2 and 8.2 psi?", engine: "auto" | "claude" | "groq" | "gemini" | "offline" = "auto") {
+async function run(deps: RouterDeps, message = "What is pO2 at 34% O2 and 8.2 psi?", engine: "auto" | "claude" | "openrouter" | "groq" | "gemini" | "offline" = "auto") {
   const events: VestaEvent[] = [];
   await runVesta({ messages: [{ role: "user", content: message }], missionId: "lunar-rover", level: "researcher", engine }, (e) => events.push(e), {
     chunkDelayMs: 0,
@@ -249,11 +249,22 @@ describe("backup chain", () => {
   });
 
   it("a chosen engine is tried first, then the chain continues", async () => {
-    expect(engineChain("gemini")).toEqual(["gemini", "claude", "groq", "offline"]);
+    expect(engineChain("gemini")).toEqual(["gemini", "claude", "openrouter", "groq", "offline"]);
     expect(engineChain("offline")).toEqual(["offline"]);
     const r = await run({ providers: {} }, "What is pO2 at 34% O2 and 8.2 psi?", "groq");
     expect(r.last.id).toBe("offline");
     expect(r.last.note).toBe("Groq no key, answered with Offline mode");
+  });
+
+  it("OpenRouter answers when set, and on a 429 falls back to Groq", async () => {
+    const ok = await run({ providers: { openrouter: mockProvider("openrouter", GOOD_PO2).provider } });
+    expect(ok.last.id).toBe("openrouter");
+    expect(ok.last.badge).toBe("via OpenRouter · openrouter-test-model");
+    const limited = mockProvider("openrouter", [httpError(429)]);
+    const groq = mockProvider("groq", GOOD_PO2);
+    const r = await run({ providers: { openrouter: limited.provider, groq: groq.provider } });
+    expect(r.last.id).toBe("groq");
+    expect(r.last.note).toBe("OpenRouter limit reached, answered with Groq");
   });
 
   it("never shows raw provider error text", async () => {
@@ -284,6 +295,7 @@ describe("engines endpoint", () => {
 
   it("lists only id, label, available and never leaks keys", async () => {
     process.env.ANTHROPIC_API_KEY = "sk-ant-SECRET-123";
+    process.env.OPENROUTER_API_KEY = "sk-or-SECRET-789";
     process.env.GROQ_API_KEY = "gsk_SECRET_456";
     process.env.GEMINI_API_KEY = "PASTE_YOUR_KEY_HERE";
     const res = enginesGET();
@@ -291,9 +303,11 @@ describe("engines endpoint", () => {
     expect(body).not.toContain("SECRET");
     expect(body).not.toContain("sk-ant");
     expect(body).not.toContain("gsk_");
+    expect(body).not.toContain("sk-or-");
     const list = JSON.parse(body) as Record<string, unknown>[];
-    expect(list.map((e) => Object.keys(e).sort().join(","))).toEqual(Array(5).fill("available,id,label"));
+    expect(list.map((e) => Object.keys(e).sort().join(","))).toEqual(Array(6).fill("available,id,label"));
     expect(list.find((e) => e.id === "claude")?.available).toBe(true);
+    expect(list.find((e) => e.id === "openrouter")?.available).toBe(true);
     expect(list.find((e) => e.id === "gemini")?.available).toBe(false);
     expect(list.find((e) => e.id === "offline")?.available).toBe(true);
   });

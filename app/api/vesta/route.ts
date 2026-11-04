@@ -17,7 +17,7 @@ const Body = z.object({
     .max(MAX_MESSAGES),
   mission: z.string().max(40).optional(),
   level: z.enum(["student", "researcher", "engineer"]).default("researcher"),
-  engine: z.enum(["auto", "claude", "groq", "gemini", "offline"]).default("auto"),
+  engine: z.enum(["auto", "claude", "openrouter", "groq", "gemini", "offline"]).default("auto"),
 });
 
 /** One request at a time per visitor (per server instance). */

@@ -3,9 +3,30 @@
 ## Status
 - Next phase: 6 (waiting for the user's "go"; the user wants a report + "go" after every phase)
 - Live URL: https://project-hearth-five.vercel.app
-- AI engines with keys: Groq and Gemini (in `.env.local` and on Vercel, Production + Preview, added after the user's permission). Claude key empty.
+- AI engines with keys: OpenRouter, Groq and Gemini on Vercel (Production + Preview, added after the user's permission). Claude key empty. The current machine's `.env.local` only has OpenRouter, so locally the chain goes OpenRouter → Offline.
 
 ## Log
+
+### OpenRouter engine added (between Phase 5 and Phase 6)
+**Done**
+- New chain: Claude → OpenRouter → Groq → Gemini → Offline. Engine id `openrouter`, `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, default `nvidia/nemotron-3.5-super-vl:free`.
+- `providers/openai-compat.ts`: the logic from `groq.ts` moved into `openAICompatProvider({ id, apiKey, model, baseURL, headers?, extraBody? })`. `groq.ts` is now a thin wrapper (same base URL, reasoning_effort low for gpt-oss only). `providers/openrouter.ts` uses the same helper.
+- Registered in engines.ts, provider types + index, `/api/vesta` enum and ModelMenu. Updated `.env.example`, the About page and CLAUDE.md.
+- Tests: 87 pass (1 new: OpenRouter answers with its badge; a 429 falls back to Groq with the note). Lint and build pass.
+- Live check against `POST /api/vesta` with engine `openrouter`: badge "via OpenRouter · nvidia/nemotron-3.5-super-vl:free", pO2 2.788 psi, source lib/physics.ts, confidence supported, about 3 s.
+- `OPENROUTER_API_KEY` added to Vercel (Production + Preview).
+
+**Decisions**
+- OpenRouter requests send `reasoning: { effort: "low", exclude: true }`, so Nemotron answers fast and keeps its output budget for the answer and tool calls.
+- `OPENROUTER_MODEL` is not set on Vercel; the default in engines.ts applies.
+
+**Problems**
+- The first live call failed with kind `server` ("service error") and fell back to Offline. The raw cause was not captured (a 5xx or an empty reply both map to this kind). It did not recur in 4 later full runs or 3 direct calls, so it looks transient.
+- Known behaviour, not changed: a fallback answer is cached like any other, so after a brief engine failure the same question keeps getting the fallback answer for up to 10 minutes.
+- This machine has no Node.js on PATH. The work used a portable Node 22 from nodejs.org in a temporary folder (checksum verified), not installed on the system. Future sessions here need Node installed or the same workaround. `npm ci` took about 8 minutes.
+
+**Next**
+- Phase 6 (see Status).
 
 ### Phase 5 done
 **Done**

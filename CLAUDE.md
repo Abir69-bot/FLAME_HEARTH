@@ -13,7 +13,7 @@ It is guided by VESTA (Virtual Engineer for Space-fire Threat Assessment), an AI
 - Hosting: the EXISTING Vercel project connected to this repo. Every push to `main` deploys. Never create a second Vercel project; link to the existing one.
 - Raw NASA data (READ-ONLY, never edit), committed in the GitHub repo and pulled with git: `Pseudo_DataKeep/{ACME,CFI,SPICE}/` each with `<INV>_Engineering_Doc.pdf`, `<INV>_Experimental_Table.csv`, `<INV>_Report.pdf`.
 - Clean data made by our script: `data/processed/` (committed, the app reads it).
-- Secrets: `.env.local` locally (git-ignored) and Vercel Environment Variables online. Possible keys: `ANTHROPIC_API_KEY`, `GROQ_API_KEY`, `GEMINI_API_KEY`, plus `ANTHROPIC_MODEL`, `GROQ_MODEL`, `GEMINI_MODEL`. Every key is OPTIONAL; an empty value or a value containing `PASTE` counts as missing. NEVER print, log or commit a key.
+- Secrets: `.env.local` locally (git-ignored) and Vercel Environment Variables online. Possible keys: `ANTHROPIC_API_KEY`, `OPENROUTER_API_KEY`, `GROQ_API_KEY`, `GEMINI_API_KEY`, plus `ANTHROPIC_MODEL`, `OPENROUTER_MODEL`, `GROQ_MODEL`, `GEMINI_MODEL`. Every key is OPTIONAL; an empty value or a value containing `PASTE` counts as missing. NEVER print, log or commit a key.
 
 ## About the data
 - ACME: gaseous-fuel flames in the Combustion Integrated Rack (CIR). Includes BRE (still-air material flammability), CFI-G (oxidizer up to 85% O2), E-FIELD Flames (electric field mimics partial gravity).
@@ -46,6 +46,7 @@ O2 partial pressure: pO2 = (O2% / 100) × P. ISS reference = 3.087 psi.
 - Charts: `echarts` + `echarts-for-react`. Client state: `zustand`. Doc search: `minisearch`. Validation: `zod` + `zod-to-json-schema`. Tests: `vitest`.
 - AI providers (server side only, in Route Handlers that stream Server-Sent Events, Node runtime, `maxDuration` 60):
   - Claude: `@anthropic-ai/sdk`, model `ANTHROPIC_MODEL`.
+  - OpenRouter: `openai` SDK with `baseURL` `https://openrouter.ai/api/v1`, model `OPENROUTER_MODEL`.
   - Groq: `openai` SDK with `baseURL` `https://api.groq.com/openai/v1`, model `GROQ_MODEL`.
   - Gemini: `@google/genai`, model `GEMINI_MODEL`.
 - Data prep (run locally once, again only if raw data changes): Python script `scripts/ingest/ingest.py` (pandas, pdfplumber, pymupdf; requirements in `scripts/ingest/requirements.txt`) writes `data/processed/tests.json`, `chunks.json`, `pdf_tables.json`, `ingest_report.md`.
@@ -54,7 +55,7 @@ O2 partial pressure: pO2 = (O2% / 100) × P. ISS reference = 3.087 psi.
 - `app/` pages: `/` overview, `/explorer`, `/compare`, `/safety`, `/lab`, `/about`; `app/api/*` route handlers
 - `components/` layout/, charts/, vesta/, ui/
 - `lib/data.ts` (load + query processed data), `lib/physics.ts`, `lib/missions.ts`, `lib/safety.ts`, `lib/search.ts`, `lib/types.ts`, `lib/store.ts`
-- `lib/vesta/` `agent.ts` (tool loop, provider-agnostic), `router.ts` (engine chain + fallback), `offline.ts` (Offline mode), `providers/` (`anthropic.ts`, `groq.ts`, `gemini.ts`, one shared interface), `system-prompt.md`, `tools/` (one file per tool), `grounding.ts`
+- `lib/vesta/` `agent.ts` (tool loop, provider-agnostic), `router.ts` (engine chain + fallback), `offline.ts` (Offline mode), `providers/` (`anthropic.ts`, `openai-compat.ts` (shared helper), `openrouter.ts`, `groq.ts`, `gemini.ts`, one shared interface), `system-prompt.md`, `tools/` (one file per tool), `grounding.ts`
 - `scripts/ingest/` Python data prep · `data/processed/` clean data · `docs/` notes · `evals/` VESTA test questions · `tests/` vitest
 
 ## Clean data model (`data/processed/tests.json`, one object per test run)
@@ -80,17 +81,18 @@ Tool schemas are written once in zod and converted for each provider. SSE events
 | Engine | Used when | Notes |
 |---|---|---|
 | 1. Claude | `ANTHROPIC_API_KEY` is set | Best quality |
-| 2. Groq (free) | `GROQ_API_KEY` is set | Default `GROQ_MODEL=openai/gpt-oss-120b` |
-| 3. Gemini (free) | `GEMINI_API_KEY` is set | Default `GEMINI_MODEL=gemini-2.5-flash` |
-| 4. Offline | always available | Rule-based, no AI, never fails |
-- Auto mode (default): try the engines in order 1 → 2 → 3 → 4 and use the first one that works. Move to the next on: missing key, 401/403, 429 (rate or free limit), 5xx, timeout (20 s), a model that cannot do tool calling, or invalid tool-call output. Never show raw provider errors to users.
+| 2. OpenRouter (free) | `OPENROUTER_API_KEY` is set | Default `OPENROUTER_MODEL=nvidia/nemotron-3.5-super-vl:free` |
+| 3. Groq (free) | `GROQ_API_KEY` is set | Default `GROQ_MODEL=openai/gpt-oss-120b` |
+| 4. Gemini (free) | `GEMINI_API_KEY` is set | Default `GEMINI_MODEL=gemini-2.5-flash` |
+| 5. Offline | always available | Rule-based, no AI, never fails |
+- Auto mode (default): try the engines in order 1 → 2 → 3 → 4 → 5 and use the first one that works. Move to the next on: missing key, 401/403, 429 (rate or free limit), 5xx, timeout (20 s), a model that cannot do tool calling, or invalid tool-call output. Never show raw provider errors to users.
 - Every engine uses the same system prompt, the same tools and the same grounding check, and must emit the same SSE events.
 - Offline mode (`lib/vesta/offline.ts`): a deterministic router detects the intent (assess conditions, compare, gaps, rank, safety audit, explain a test or a topic, help), pulls numbers like "34%" or "8.2 psi" from the message, calls the same tools and builds a templated answer with sources and a confidence tag. Unknown questions get a short list of what it can do.
 - `GET /api/vesta/engines` returns only `{id, label, available}` for each engine (never keys or key fragments). The frontend uses it for the model menu.
 - Cost and limits: max 6 tool rounds, short answers, cache identical questions for 10 minutes, one request at a time per visitor.
 
 ## VESTA model menu (in the VESTA panel header)
-- Dropdown with: Auto (recommended) · Claude · Groq · Gemini · Offline. Engines without a key are shown greyed out with "no key" and cannot be picked.
+- Dropdown with: Auto (recommended) · Claude · OpenRouter · Groq · Gemini · Offline. Engines without a key are shown greyed out with "no key" and cannot be picked.
 - The choice is saved in the zustand store and in localStorage, and sent with every message.
 - If the picked engine fails, VESTA falls back down the chain and shows a small note in that message, e.g. "Groq limit reached, answered with Gemini".
 - Every VESTA message shows a small badge with the engine that answered (e.g. "via Groq · gpt-oss-120b", "Offline mode").
