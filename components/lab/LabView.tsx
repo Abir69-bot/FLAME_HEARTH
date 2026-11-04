@@ -108,9 +108,9 @@ export function LabView() {
     const good = labRows.filter((r) => !r.problems.length && r.o2_pct != null && r.pressure_psi != null);
     return {
       backgroundColor: "transparent",
-      legend: { top: 0, textStyle: { color: "#97A3BC" } },
+      legend: { type: "scroll", pageIconColor: "#FFB98A", pageIconInactiveColor: "#1F2A44", pageTextStyle: { color: "#97A3BC" }, top: 0, right: 8, textStyle: { color: "#97A3BC" } },
       tooltip: { trigger: "item", backgroundColor: "#131B2E", borderColor: "#1F2A44", textStyle: { color: "#E8ECF6" } },
-      grid: { left: 8, right: 16, top: 34, bottom: 30, containLabel: true },
+      grid: { left: 8, right: 16, top: 52, bottom: 30, containLabel: true },
       xAxis: { type: "value", name: "Pressure (psi)", nameLocation: "middle", nameGap: 24, min: 0, max: 80, axisLabel: { color: "#97A3BC" }, splitLine: { lineStyle: { color: "#1F2A44" } }, nameTextStyle: { color: "#97A3BC" } },
       yAxis: { type: "value", name: "O2 (%)", min: 0, max: 100, axisLabel: { color: "#97A3BC" }, splitLine: { lineStyle: { color: "#1F2A44" } }, nameTextStyle: { color: "#97A3BC" } },
       dataZoom: [{ type: "inside", xAxisIndex: 0, filterMode: "none" }, { type: "inside", yAxisIndex: 0, filterMode: "none" }],
@@ -126,7 +126,7 @@ export function LabView() {
   return (
     <div className="space-y-5">
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-        <section aria-label="Conditions" className="space-y-4 rounded-xl border border-line bg-panel p-4">
+        <section aria-label="Conditions" className="space-y-4 hud-panel p-4">
           <h2 className="font-head text-sm font-semibold uppercase tracking-wider text-muted">Your conditions</h2>
           <Field label="Oxygen" unit="%" value={o2} min={0} max={100} step={0.5} onChange={setO2} />
           <Field label="Pressure" unit="psi" value={p} min={0.5} max={80} step={0.1} onChange={setP} />
@@ -149,7 +149,7 @@ export function LabView() {
           </button>
         </section>
 
-        <section aria-label="Results" className="space-y-3 rounded-xl border border-line bg-panel p-4" aria-live="polite">
+        <section aria-label="Results" className="space-y-3 hud-panel p-4" aria-live="polite">
           {err && <p className="text-sm text-bad">Could not compute these conditions.</p>}
           {!calc ? (
             <div className="h-64 animate-pulse rounded bg-raised" />
@@ -202,11 +202,11 @@ export function LabView() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <figure className="min-w-0 rounded-xl border border-line bg-panel p-3">
+        <figure className="min-w-0 hud-panel p-3">
           <figcaption className="text-xs font-semibold text-muted">All NASA tests, the 5 nearest and your condition (pulsing)</figcaption>
           <EChart option={chart} height={340} ariaLabel="Scatter of NASA tests, the five nearest tests and your condition" />
         </figure>
-        <section aria-label="Nearest tests" className="rounded-xl border border-line bg-panel p-4">
+        <section aria-label="Nearest tests" className="hud-panel p-4">
           <h2 className="mb-2 font-head text-sm font-semibold uppercase tracking-wider text-muted">Nearest 5 NASA tests</h2>
           {calc?.nearest.length === 0 && <p className="text-sm text-muted">No NASA tests of this material — a data gap.</p>}
           <ol className="space-y-1.5">
@@ -278,7 +278,7 @@ function CsvUpload({ rowsCount, onRows }: { rowsCount: number; onRows: (r: Retur
   );
 
   return (
-    <section aria-label="Upload your data" className="space-y-3 rounded-xl border border-line bg-panel p-4">
+    <section aria-label="Upload your data" className="space-y-3 hud-panel p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-head text-sm font-semibold uppercase tracking-wider text-muted">Upload your own data (CSV)</h2>
         <a href="/sample_lab_data.csv" download className="text-xs text-ember-soft underline">

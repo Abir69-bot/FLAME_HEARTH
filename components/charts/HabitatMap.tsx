@@ -74,8 +74,8 @@ export function HabitatMap({ height = 420 }: { height?: number }) {
     return {
       backgroundColor: "transparent",
       animationDuration: 800,
-      grid: { left: 52, right: 18, top: 36, bottom: 48 },
-      legend: { top: 0, textStyle: { color: "#97A3BC" }, itemWidth: 10, itemHeight: 10, data: ["ACME", "CFI", "SPICE", "ISS pO2 (3.087 psi)", "Missions", ...(labRows.length ? ["My data (not NASA)"] : [])] },
+      grid: { left: 52, right: 18, top: 52, bottom: 48 },
+      legend: { type: "scroll", pageIconColor: "#FFB98A", pageIconInactiveColor: "#1F2A44", pageTextStyle: { color: "#97A3BC" }, top: 0, textStyle: { color: "#97A3BC" }, itemWidth: 10, itemHeight: 10, data: ["ACME", "CFI", "SPICE", "ISS pO2 (3.087 psi)", "Missions", ...(labRows.length ? ["My data (not NASA)"] : [])] },
       tooltip: {
         trigger: "item",
         backgroundColor: "#131B2E",

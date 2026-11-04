@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { PolarisMark } from "@/components/ui/Polaris";
 
 export const metadata: Metadata = { title: "About" };
 
@@ -48,9 +49,20 @@ export default function AboutPage() {
         HEARTH (Habitat Environment Analysis &amp; Risk Tracking Hub) summarises, ranks and interprets NASA microgravity combustion experiments to give fire-safety insights for crewed habitats: the ISS, a lunar base, pressurized rovers and spacesuits. It is guided by VESTA (Virtual Engineer for Space-fire Threat Assessment), an AI crewmate that computes, charts, compares and audits inside the dashboard.
       </PageHeader>
 
+      <section aria-label="Team Polaris" className="hud-panel flex flex-wrap items-center gap-4 p-5">
+        <PolarisMark size={52} className="animate-twinkle text-star drop-shadow-[0_0_14px_rgba(207,230,255,0.6)]" />
+        <div className="min-w-0 flex-1 basis-64">
+          <h2 className="font-head text-2xl font-bold tracking-wider text-star">Team Polaris</h2>
+          <p className="text-xs uppercase tracking-[0.15em] text-muted">NASA Space Apps Challenge 2026</p>
+          <p className="mt-2 text-sm text-muted">
+            Polaris is the star the night sky appears to turn around, the fixed point navigators steer by. That is what we want HEARTH to be for crews and engineers planning life beyond Earth: a steady reference, built only from evidence. Look for it in the sky behind this dashboard.
+          </p>
+        </div>
+      </section>
+
       <section aria-label="Investigations" className="grid gap-3 lg:grid-cols-3">
         {INVESTIGATIONS.map((i) => (
-          <article key={i.name} className="rounded-xl border border-line bg-panel p-4 text-sm">
+          <article key={i.name} className="hud-panel p-4 text-sm">
             <h2 className={`font-head text-lg font-bold ${i.color}`}>{i.name}</h2>
             <p className="mb-2 text-xs text-muted">{i.full}</p>
             <p>
@@ -64,7 +76,7 @@ export default function AboutPage() {
       </section>
 
       <section className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-line bg-panel p-4 text-sm">
+        <div className="hud-panel p-4 text-sm">
           <h2 className="mb-2 font-head text-sm font-semibold uppercase tracking-wider text-muted">What each file holds</h2>
           <dl className="space-y-2">
             {FILES.map(([f, d]) => (
@@ -78,7 +90,7 @@ export default function AboutPage() {
             The raw files are read-only. A Python script converts them into one clean table (units converted, unknown values left empty, every mapping decision documented in docs/DATA_NOTES.md). Exact duplicate rows are kept but not counted; rows that fail range checks are kept and flagged.
           </p>
         </div>
-        <div className="rounded-xl border border-line bg-panel p-4 text-sm">
+        <div className="hud-panel p-4 text-sm">
           <h2 className="mb-2 font-head text-sm font-semibold uppercase tracking-wider text-muted">Credits</h2>
           <p>
             All experimental data and documents come from NASA&apos;s{" "}
@@ -103,7 +115,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="rounded-xl border border-line bg-panel p-4 text-sm">
+      <section className="hud-panel p-4 text-sm">
         <h2 className="mb-2 font-head text-sm font-semibold uppercase tracking-wider text-muted">How VESTA works</h2>
         <p className="text-muted">
           VESTA is a tool-using agent. It never states a number it did not get from a tool: it queries the test table, searches the PDFs, runs tested formulas (pO2, ratios, flow regime, envelope check, nearest tests), compares and ranks investigations, finds gaps, runs a safety audit, draws charts and moves the dashboard. A grounding check compares every number in an answer with the tool results; anything unverifiable is flagged and the confidence is lowered. Every answer ends with its sources and one confidence tag: supported, extrapolated or no data.

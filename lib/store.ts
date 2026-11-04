@@ -59,6 +59,7 @@ interface HearthState {
   unpin: (id: string) => void;
   addMessage: (m: VestaMessage) => void;
   updateMessage: (id: string, fn: (m: VestaMessage) => VestaMessage) => void;
+  clearMessages: () => void;
   setBusy: (b: boolean) => void;
   setDraft: (d: string) => void;
 }
@@ -84,6 +85,7 @@ export const useHearth = create<HearthState>((set) => ({
   unpin: (id) => set((s) => ({ pinned: s.pinned.filter((p) => p.id !== id) })),
   addMessage: (m) => set((s) => ({ messages: [...s.messages, m].slice(-60) })),
   updateMessage: (id, fn) => set((s) => ({ messages: s.messages.map((m) => (m.id === id ? fn(m) : m)) })),
+  clearMessages: () => set({ messages: [] }),
   setBusy: (busy) => set({ busy }),
   setDraft: (draft) => set({ draft }),
 }));

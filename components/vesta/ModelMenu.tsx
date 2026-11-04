@@ -35,7 +35,7 @@ export function ModelMenu() {
 
   return (
     <label className="flex items-center gap-1.5 text-xs text-muted">
-      <span className="sr-only sm:not-sr-only">Model</span>
+      <span className="sr-only">Model</span>
       <select
         value={engine}
         onChange={(e) => setEngine(e.target.value as EngineChoice)}

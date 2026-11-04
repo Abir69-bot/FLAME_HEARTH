@@ -62,7 +62,7 @@ export function RankBars() {
   }, [data]);
 
   return (
-    <section aria-label="Investigation ranking" className="rounded-xl border border-line bg-panel p-4">
+    <section aria-label="Investigation ranking" className="hud-panel p-4">
       <h2 className="font-head text-sm font-semibold uppercase tracking-wider text-muted">Most relevant investigations</h2>
       <p className="mb-2 text-[11px] text-muted">
         {data ? `For ${data.mission.short} (${data.mission.o2_pct}% O2, ${data.mission.pressure_psi} psi). ` : ""}Score = proximity 40 + O2 coverage 20 + pressure coverage 20 + tests in envelope 20 (heuristic). Hover for reasons.

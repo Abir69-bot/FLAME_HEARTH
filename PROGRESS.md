@@ -7,6 +7,29 @@
 
 ## Log
 
+### Front-end redesign: space, fire and Team Polaris (between Phase 5 and Phase 6)
+**Done**
+- Backdrop (`components/fx/SpaceBackdrop.tsx`): stars turning slowly around a marked Polaris with the Little Dipper, embers drifting with no "up", a star streak on mission change, an occasional shooting star. Embers speed up while VESTA works.
+- Team Polaris: north-star mark and badge in the top bar, hero line, team card in the left rail, site footer, a section on About.
+- Overview hero: living spherical flame (labelled artwork, not a simulation), "Run a safety audit" and "Explore the tests" buttons, test count from the API. Mission tiles replay an entrance and light sweep on mission change; O2, pressure and pO2 have meters (pO2 marks the ISS reference).
+- `.hud-panel` instrument style on every panel (corner brackets, warm top edge), page fade via `app/template.tsx`, flowing heat line under the top bar.
+- VESTA panel: larger orb with state text, starter cards, live tool activity in plain words that folds into "N tools used", "+N more" sources, follow-up questions, Markdown rendering (`parseRichText.ts`: lists, headings, code, tables; rendered as text, never HTML), copy, Stop, Clear chat, "/" to focus, floating "Ask VESTA" button on phones.
+- 8 new tests (95 in total). Checked in a real browser at 1500 px and 400 px: every page, no console errors, no sideways scroll, Stop, mission switching, reduced motion (backdrop still, no endless animations).
+
+**Decisions**
+- No new dependencies: canvas and CSS only. Frame rate capped at 30 fps (20 on weak devices), fewer particles on weak devices, orb skips drawing off screen, no backdrop blur.
+- Decoration encodes no data, so it needs no DEMO label; the flame carries an "artwork" caption and meters use real values on stated scales.
+- Follow-up and starter questions are worded so Offline mode understands them (tested) and hold no numbers of their own.
+
+**Problems**
+- Found and fixed an old bug: Tailwind colours were `var(--x)`, so all 41 distinct opacity classes (`border-warn/60`, `bg-ember/15`…) silently failed, which is why alerts and pills had white borders. Colours in `tailwind.config.ts` are now hex and must be kept in sync with `app/globals.css`.
+- `richtext.ts` and `RichText.tsx` collided on Windows (same name apart from case), so the parser is `parseRichText.ts`.
+- OpenRouter's free tier allows 50 requests per day per account, and one VESTA question uses at least 2. The limit was reached during testing; VESTA fell back as designed. All visitors of the live site share it. OpenRouter says adding 10 credits raises it to 1000 per day.
+- Not fixed: Offline mode answers "What oxygen levels were tested in the CFI droplet experiments?" with the generic mission assessment instead of CFI's oxygen levels (keyword routing).
+
+**Next**
+- Phase 6 (see Status). Its tour and final polish should build on this design.
+
 ### OpenRouter engine added (between Phase 5 and Phase 6)
 **Done**
 - New chain: Claude → OpenRouter → Groq → Gemini → Offline. Engine id `openrouter`, `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, default `nvidia/nemotron-3.5-super-vl:free`.

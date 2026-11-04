@@ -89,7 +89,7 @@ export function Explorer() {
     const entries = Object.entries(data.by_campaign).sort((a, b) => b[1] - a[1]);
     return {
       backgroundColor: "transparent",
-      grid: { left: 8, right: 30, top: 10, bottom: 10, containLabel: true },
+      grid: { left: 16, right: 30, top: 10, bottom: 10, containLabel: true },
       tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
       xAxis: { type: "value", axisLabel: { color: "#97A3BC" }, splitLine: { lineStyle: { color: "#1F2A44" } } },
       yAxis: { type: "category", data: entries.map((e) => e[0]).reverse(), axisLabel: { color: "#E8ECF6", fontSize: 10 } },
@@ -125,7 +125,7 @@ export function Explorer() {
 
   return (
     <div className="space-y-4">
-      <section aria-label="Filters" className="flex flex-wrap items-end gap-3 rounded-xl border border-line bg-panel p-3">
+      <section aria-label="Filters" className="flex flex-wrap items-end gap-3 hud-panel p-3">
         <fieldset className="flex gap-1.5">
           <legend className="mb-1 text-[11px] text-muted">Investigations</legend>
           {(["ACME", "CFI", "SPICE"] as Inv[]).map((i) => (
@@ -166,17 +166,17 @@ export function Explorer() {
       </section>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <figure className="min-w-0 overflow-hidden rounded-xl border border-line bg-panel p-3">
+        <figure className="min-w-0 overflow-hidden hud-panel p-3">
           <figcaption className="mb-1 text-xs font-semibold text-muted">Tests per campaign (filtered)</figcaption>
           {campaignOption ? <EChart option={campaignOption} height={180} ariaLabel="Bar chart of tests per campaign" /> : <div className="h-[180px] animate-pulse rounded bg-raised" />}
         </figure>
-        <figure className="min-w-0 overflow-hidden rounded-xl border border-line bg-panel p-3">
+        <figure className="min-w-0 overflow-hidden hud-panel p-3">
           <figcaption className="mb-1 text-xs font-semibold text-muted">O2 distribution (filtered, {HIST_BIN}% bins)</figcaption>
           {histOption ? <EChart option={histOption} height={180} ariaLabel="Histogram of O2 percentage" /> : <div className="h-[180px] animate-pulse rounded bg-raised" />}
         </figure>
       </div>
 
-      <section aria-label="Test table" className="rounded-xl border border-line bg-panel">
+      <section aria-label="Test table" className="hud-panel">
         <div className="flex items-center justify-between px-3 py-2 text-xs text-muted">
           <span role="status">{err ? "Could not load tests." : data ? `${data.total} tests${loading ? " · updating…" : ""}` : "Loading…"}</span>
           <span>Duplicates hidden · click a row for details</span>

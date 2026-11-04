@@ -1,15 +1,19 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
 import { newId, useHearth } from "@/lib/store";
 import { streamVesta } from "@/lib/vesta/client";
 import type { UiEvent } from "@/lib/vesta/tools/ui_action";
 
 const MAX_INPUT = 2000;
 
+/** The question in flight. Shared because any component may send, and the VESTA panel holds the Stop button. */
+let active: AbortController | null = null;
+
 export function useVesta() {
   const router = useRouter();
-  const abortRef = useRef<AbortController | null>(null);
+
+  const stop = useCallback(() => active?.abort(), []);
 
   const applyUi = useCallback(
     (ui: UiEvent) => {
@@ -38,11 +42,12 @@ export function useVesta() {
       const id = newId();
       st.addMessage({ id, role: "vesta", text: "", steps: [], charts: [], sources: [], pending: true });
       const upd = useHearth.getState().updateMessage;
-      abortRef.current = new AbortController();
+      const controller = new AbortController();
+      active = controller;
       try {
         const stream = streamVesta(
           { messages: [...history, { role: "user", content: text }], mission: st.missionId, level: st.level, engine: st.engine },
-          abortRef.current.signal,
+          controller.signal,
         );
         for await (const ev of stream) {
           switch (ev.type) {
@@ -82,7 +87,8 @@ export function useVesta() {
           }
         }
       } catch {
-        upd(id, (m) => ({ ...m, error: "Connection to VESTA was lost. Please try again." }));
+        if (controller.signal.aborted) upd(id, (m) => ({ ...m, note: "Stopped before finishing." }));
+        else upd(id, (m) => ({ ...m, error: "Connection to VESTA was lost. Please try again." }));
       } finally {
         upd(id, (m) => ({ ...m, pending: false }));
         useHearth.getState().setBusy(false);
@@ -91,7 +97,7 @@ export function useVesta() {
     [applyUi],
   );
 
-  return { send, applyUi };
+  return { send, stop, applyUi };
 }
 
 /** Ask the server for the no-AI proactive alert of a mission and post it as a VESTA message. */

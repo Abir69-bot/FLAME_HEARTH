@@ -25,6 +25,27 @@ export const IconSend = (p: P) => (
 export const IconClose = (p: P) => (
   <svg {...base} className={p.className}><path d="M6 6l12 12M18 6L6 18" /></svg>
 );
+export const IconCheck = (p: P) => (
+  <svg {...base} className={p.className}><circle cx="12" cy="12" r="9" /><path d="M8.5 12.5l2.5 2.5 4.5-5" /></svg>
+);
+export const IconAudit = (p: P) => (
+  <svg {...base} className={p.className}><path d="M12 3c1 3.5 6 5.5 6 11a6 6 0 01-12 0c0-2.5 1.5-4 2.5-5 0 2 1 3 2 3-.5-3 .5-6 1.5-9z" /></svg>
+);
+export const IconRank = (p: P) => (
+  <svg {...base} className={p.className}><path d="M5 6h14M5 12h9M5 18h5" /></svg>
+);
+export const IconGap = (p: P) => (
+  <svg {...base} className={p.className}><circle cx="11" cy="11" r="7" /><path d="M16.5 16.5L21 21M11 8v3.5M11 14v.2" /></svg>
+);
+export const IconStop = (p: P) => (
+  <svg {...base} className={p.className}><rect x="6" y="6" width="12" height="12" rx="2" /></svg>
+);
+export const IconTrash = (p: P) => (
+  <svg {...base} className={p.className}><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>
+);
+export const IconCopy = (p: P) => (
+  <svg {...base} className={p.className}><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V6a2 2 0 012-2h9" /></svg>
+);
 export const IconPin = (p: P) => (
   <svg {...base} className={p.className}><path d="M12 17v4M8 3h8l-1 6 3 3H6l3-3z" /></svg>
 );

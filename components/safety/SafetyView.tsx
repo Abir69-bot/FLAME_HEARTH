@@ -162,7 +162,7 @@ export function SafetyView() {
             {findings
               ?.filter((f) => f.category === cat.id)
               .map((f) => (
-                <article key={f.id} className="animate-fadeUp space-y-2 rounded-xl border border-line bg-panel p-4">
+                <article key={f.id} className="animate-fadeUp space-y-2 hud-panel p-4">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-semibold">{f.title}</h3>
                     <span className="font-mono text-sm" title={f.severity_rule}>
@@ -197,11 +197,11 @@ export function SafetyView() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <figure className="min-w-0 rounded-xl border border-line bg-panel p-3">
+        <figure className="min-w-0 hud-panel p-3">
           <figcaption className="mb-1 text-xs font-semibold text-muted">Test coverage: O2 × pressure (count per cell; red = gap; outlined = active mission)</figcaption>
           {heat ? <EChart option={heat} height={360} ariaLabel="Heatmap of NASA test counts by O2 and pressure bins" /> : <div className="h-[360px] animate-pulse rounded bg-raised" />}
         </figure>
-        <section className="space-y-3 rounded-xl border border-line bg-panel p-4">
+        <section className="space-y-3 hud-panel p-4">
           <h2 className="font-head text-sm font-semibold uppercase tracking-wider text-muted">Data gaps and the experiments that would fill them</h2>
           {gaps && (
             <>
@@ -226,7 +226,7 @@ export function SafetyView() {
         </section>
       </div>
 
-      <section aria-label="Uses on Earth" className="rounded-xl border border-line bg-panel p-4">
+      <section aria-label="Uses on Earth" className="hud-panel p-4">
         <h2 className="mb-2 font-head text-sm font-semibold uppercase tracking-wider text-muted">Uses on Earth</h2>
         <div className="grid gap-3 md:grid-cols-3">
           {EARTH.map((e) => (

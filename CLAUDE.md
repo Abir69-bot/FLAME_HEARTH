@@ -53,7 +53,7 @@ O2 partial pressure: pO2 = (O2% / 100) × P. ISS reference = 3.087 psi.
 
 ## Folder layout (target)
 - `app/` pages: `/` overview, `/explorer`, `/compare`, `/safety`, `/lab`, `/about`; `app/api/*` route handlers
-- `components/` layout/, charts/, vesta/, ui/
+- `components/` layout/, charts/, vesta/, ui/, fx/ (decorative canvas effects, never data)
 - `lib/data.ts` (load + query processed data), `lib/physics.ts`, `lib/missions.ts`, `lib/safety.ts`, `lib/search.ts`, `lib/types.ts`, `lib/store.ts`
 - `lib/vesta/` `agent.ts` (tool loop, provider-agnostic), `router.ts` (engine chain + fallback), `offline.ts` (Offline mode), `providers/` (`anthropic.ts`, `openai-compat.ts` (shared helper), `openrouter.ts`, `groq.ts`, `gemini.ts`, one shared interface), `system-prompt.md`, `tools/` (one file per tool), `grounding.ts`
 - `scripts/ingest/` Python data prep · `data/processed/` clean data · `docs/` notes · `evals/` VESTA test questions · `tests/` vitest

@@ -187,27 +187,27 @@ export function CompareView() {
       </div>
       {err && <p className="text-sm text-bad">Could not load the comparison.</p>}
       <div className="grid gap-4 xl:grid-cols-2">
-        <figure className="min-w-0 animate-fadeUp rounded-xl border border-line bg-panel p-3">
+        <figure className="min-w-0 animate-fadeUp hud-panel p-3">
           <figcaption className="text-xs font-semibold text-muted">Coverage radar (0–100 per axis; hover for raw values and formulas)</figcaption>
           {radar ? <EChart option={radar} height={320} ariaLabel="Radar chart of investigation coverage" /> : <div className="h-[320px] animate-pulse rounded bg-raised" />}
         </figure>
-        <figure className="min-w-0 animate-fadeUp rounded-xl border border-line bg-panel p-3">
+        <figure className="min-w-0 animate-fadeUp hud-panel p-3">
           <figcaption className="text-xs font-semibold text-muted">Mean test conditions</figcaption>
           {bars ? <EChart option={bars} height={320} ariaLabel="Grouped bars of mean O2, pressure and airflow" /> : <div className="h-[320px] animate-pulse rounded bg-raised" />}
         </figure>
       </div>
-      <figure className="min-w-0 rounded-xl border border-line bg-panel p-3">
+      <figure className="min-w-0 hud-panel p-3">
         <figcaption className="text-xs font-semibold text-muted">Where each investigation tested (O2 vs pressure, unique conditions)</figcaption>
         {scatter ? <EChart option={scatter} height={300} ariaLabel="Overlay scatter of tested conditions" /> : <div className="h-[300px] animate-pulse rounded bg-raised" />}
       </figure>
       {data && (
         <div className="grid gap-4 lg:grid-cols-2">
-          <section className="rounded-xl border border-line bg-panel p-4">
+          <section className="hud-panel p-4">
             <h2 className="mb-2 font-head text-sm font-semibold uppercase tracking-wider text-muted">Shared by all</h2>
             <AttrList items={data.shared} empty="Nothing in common beyond microgravity operation." />
           </section>
           {sel.map((inv) => (
-            <section key={inv} className="rounded-xl border border-line bg-panel p-4">
+            <section key={inv} className="hud-panel p-4">
               <h2 className="mb-2 font-head text-sm font-semibold uppercase tracking-wider" style={{ color: INV_COLORS[inv] }}>
                 Only in {inv}
               </h2>
