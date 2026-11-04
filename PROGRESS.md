@@ -7,6 +7,21 @@
 
 ## Log
 
+### Dataset page (added during Phase 6 at the user's request)
+**Done**
+- New page `/dataset` ("Dataset", right after My data lab; VESTA can open it). No new dependencies.
+- Sections: at a glance, data flow and storage, split explorer (10 ways to slice the data), every field with fill rates and origin, three investigation profiles, 9 distributions with statistics tables, raw row vs clean record for any test, quality flags and limits, train/test split builder, downloads, NASA references with checksums.
+- `lib/dataset.ts` computes every number; `lib/dataset-docs.ts` holds the explanations; `lib/dataset-split.ts` makes splits and CSV; `/api/dataset/[file]` serves static downloads; `scripts/ingest/describe_sources.py` writes `data/processed/sources.json`.
+- 16 new tests (148 in total). Checked in headless Chrome at 400, 1024 and 1440 px, with every row opened, plus reduced motion and all downloads.
+
+**Decisions**
+- The page says plainly that this data has no train/test split, because HEARTH trains no model. The split builder is labelled as a helper for other people's modelling.
+- The fuel split decides across the whole dataset: propane burned in both ACME and SPICE, so a per-investigation split leaked it (a test caught this).
+- No PSI record numbers are shown: they are not in the raw files and could not be confirmed. References use the details printed on each document, plus verified NASA links and a live PSI search.
+
+**Problems**
+- Evals could not finish (`evals/report.md`): Offline 12/12. Groq 3 of 5 scored, then 11 questions hit its free limit. Gemini and OpenRouter scored 0 questions, all limit or fallback. A first run of mine used up part of those limits. Run again once the limits reset, spread over more time. Two real Groq failures to look at: q03 returned a different confidence tag, and q12 answered without calling a tool or giving sources.
+
 ### Phase 6, part 2 (partial, not the launch commit)
 **Done**
 - Review: no secrets in git history, no key names in the browser JavaScript. DEMO labels present on the simulator and telemetry.

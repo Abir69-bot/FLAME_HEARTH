@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { PolarisMark } from "@/components/ui/Polaris";
@@ -94,6 +95,9 @@ export default function AboutPage() {
         </div>
         <div className="hud-panel p-4 text-sm">
           <h2 className="mb-2 font-head text-sm font-semibold uppercase tracking-wider text-muted">Credits</h2>
+          <p className="mb-2">
+            <Link href="/dataset" className="text-ember-soft underline">See the Dataset page</Link> for every field, file and NASA reference.
+          </p>
           <p>
             All experimental data and documents come from NASA&apos;s{" "}
             <a className="text-ember-soft underline" href="https://psi.nasa.gov" target="_blank" rel="noreferrer">

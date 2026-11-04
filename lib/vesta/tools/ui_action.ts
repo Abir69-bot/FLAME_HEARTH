@@ -3,7 +3,7 @@ import { getTest } from "@/lib/data";
 import { getMission } from "@/lib/missions";
 import { defineTool, fail } from "./types";
 
-export const VIEWS = ["overview", "explorer", "compare", "safety", "lab", "simulator", "about"] as const;
+export const VIEWS = ["overview", "explorer", "compare", "safety", "lab", "dataset", "simulator", "about"] as const;
 export type View = (typeof VIEWS)[number];
 
 export const VIEW_PATHS: Record<View, string> = {
@@ -12,6 +12,7 @@ export const VIEW_PATHS: Record<View, string> = {
   compare: "/compare",
   safety: "/safety",
   lab: "/lab",
+  dataset: "/dataset",
   simulator: "/simulator",
   about: "/about",
 };
@@ -62,7 +63,7 @@ export function validateUi(a: UiActionArgs): UiEvent | string {
 export const uiActionTool = defineTool({
   name: "ui_action",
   description:
-    "Move the HEARTH dashboard: go_view (overview, explorer, compare, safety, lab, about), set_mission, highlight_tests on the map, or open_test details. Use it whenever the answer is easier to see on a page.",
+    "Move the HEARTH dashboard: go_view (overview, explorer, compare, safety, lab, dataset, simulator, about), set_mission, highlight_tests on the map, or open_test details. Use it whenever the answer is easier to see on a page.",
   input: UiActionInput,
   run(a) {
     const ev = validateUi(a);

@@ -1,0 +1,140 @@
+{
+  "raw": [
+    {
+      "investigation": "ACME",
+      "kind": "table",
+      "file": "Pseudo_DataKeep/ACME/ACME_Experimental_Table.csv",
+      "bytes": 41509,
+      "sha256": "ce17a760e039ab0eb227828d7a1dfcb8bccb079cdab363cbd3f9e8b1f99a0c2a",
+      "columns": [
+        "Flame Type",
+        "Day",
+        "Fuel",
+        "Test",
+        "Cool flame?",
+        "XO2 before test",
+        "XO2  after test",
+        "approx p (bar)",
+        "Xf",
+        "mHC (mg/s)",
+        "TFP",
+        "Tad (K)",
+        "Zst",
+        "Hot ignition",
+        "burn time (sec)",
+        "Self-ext or flow term",
+        "Peak burner T (C )",
+        "Comments"
+      ],
+      "rows": 333,
+      "blank_rows": 11
+    },
+    {
+      "investigation": "ACME",
+      "kind": "report",
+      "file": "Pseudo_DataKeep/ACME/ACME_Report.pdf",
+      "bytes": 3894907,
+      "sha256": "f6cce7cc08ca69c155994d7a8898e21cd4aba122f4e46d5e00708e4889a1ebab",
+      "pages": 93
+    },
+    {
+      "investigation": "ACME",
+      "kind": "engineering",
+      "file": "Pseudo_DataKeep/ACME/ACME_Engineering_Doc.pdf",
+      "bytes": 7496324,
+      "sha256": "393f3ebc6662b10f0fe55d87ceda3b6696d2cc9c91266b81132761de50078456",
+      "pages": 102
+    },
+    {
+      "investigation": "CFI",
+      "kind": "table",
+      "file": "Pseudo_DataKeep/CFI/CFI_Experimental_Table.csv",
+      "bytes": 7792,
+      "sha256": "fb898e28762353aa132c16b886dbd207a024b1dd3c9bed5928d70d8036d2ec7e",
+      "columns": [
+        "Flex Number",
+        "Test Date",
+        "Local Time",
+        "CIR",
+        "Pressure",
+        "Oxygen",
+        "Nitrogen",
+        "Helium",
+        "Fiber",
+        "Fuel"
+      ],
+      "rows": 87,
+      "blank_rows": 0
+    },
+    {
+      "investigation": "CFI",
+      "kind": "report",
+      "file": "Pseudo_DataKeep/CFI/CFI_Report.pdf",
+      "bytes": 811459,
+      "sha256": "e15158689180314583917200a071730d3aed9088e1ae689b847bd416674010f9",
+      "pages": 13
+    },
+    {
+      "investigation": "CFI",
+      "kind": "engineering",
+      "file": "Pseudo_DataKeep/CFI/CFI_Engineering_Doc.pdf",
+      "bytes": 115496,
+      "sha256": "4e6dc66cb2a4bac018296ddc956281f71637242d72a764fc8d5e349bf1418a7b",
+      "pages": 1
+    },
+    {
+      "investigation": "SPICE",
+      "kind": "table",
+      "file": "Pseudo_DataKeep/SPICE/SPICE_Experimental_Table.csv",
+      "bytes": 31205,
+      "sha256": "fb0d7e60cf5367afb429089e9901d27288f78038efd26c8de1db4fbe04117136",
+      "columns": [
+        "GMT date",
+        "GMT ignition",
+        "GMT  Flame Off",
+        "Fuel",
+        "Nozzle (mm)",
+        "Fuel Rate (sccm)",
+        "Fuel Rate (mg/s)",
+        "HC Fuel Rate (mg/s)",
+        "Air Rate (cm/s)"
+      ],
+      "rows": 469,
+      "blank_rows": 0
+    },
+    {
+      "investigation": "SPICE",
+      "kind": "report",
+      "file": "Pseudo_DataKeep/SPICE/SPICE_Report.pdf",
+      "bytes": 601754,
+      "sha256": "95e76859017d201dcd6a9fb12f1df568aed77e0edf7a1b609975db37f32fa680",
+      "pages": 28
+    },
+    {
+      "investigation": "SPICE",
+      "kind": "engineering",
+      "file": "Pseudo_DataKeep/SPICE/SPICE_Engineering_Doc.pdf",
+      "bytes": 4490750,
+      "sha256": "f4af29131ce44e4124c105a1ea4c85623a98ef28f852f7fbe9f94b5652c2bf27",
+      "pages": 120
+    }
+  ],
+  "processed": [
+    {
+      "file": "data/processed/tests.json",
+      "bytes": 1068643
+    },
+    {
+      "file": "data/processed/chunks.json",
+      "bytes": 870704
+    },
+    {
+      "file": "data/processed/pdf_tables.json",
+      "bytes": 97906
+    },
+    {
+      "file": "data/processed/ingest_report.md",
+      "bytes": 1469
+    }
+  ]
+}

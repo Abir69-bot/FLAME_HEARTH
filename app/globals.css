@@ -261,3 +261,30 @@ h1, h2, h3, h4 {
     scroll-behavior: auto !important;
   }
 }
+
+/* Dataset page: data moving between the pipeline stages. */
+.data-flow {
+  width: 2px;
+  height: 22px;
+  background-image: linear-gradient(to bottom, var(--ember, #ff7a2f) 50%, transparent 50%);
+  background-size: 2px 10px;
+  animation: data-flow-y 0.9s linear infinite;
+}
+@media (min-width: 768px) {
+  .data-flow {
+    width: 26px;
+    height: 2px;
+    background-image: linear-gradient(to right, var(--ember, #ff7a2f) 50%, transparent 50%);
+    background-size: 10px 2px;
+    animation-name: data-flow-x;
+  }
+}
+@keyframes data-flow-y {
+  to { background-position: 0 10px; }
+}
+@keyframes data-flow-x {
+  to { background-position: 10px 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .data-flow { animation: none; }
+}

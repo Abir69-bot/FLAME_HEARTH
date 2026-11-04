@@ -124,6 +124,19 @@ within 19–24%" (p19). These rows get the flag `conditions_from_doc`. `measurem
 - O2 range: ACME normal 18.0–40.0% (chamber), ACME inverse 12–85% (oxidizer stream), CFI 17–21%, SPICE 21% (doc).
 - Pressure range: ACME 0.50–3.31 bar (7.2–48.0 psi), CFI 0.5–5 atm (7.3–73.5 psi), SPICE 14.65 psi.
 
+## Dataset page (`/dataset`)
+
+`data/processed/sources.json` records each raw file's size, SHA-256, pages, rows and columns. It is made by
+`python -I scripts/ingest/describe_sources.py`; run it again whenever raw data changes (a test checks the sizes,
+checksums and row counts). Field and flag explanations are in `lib/dataset-docs.ts` (tests fail if a field or flag
+in the data has no explanation); all counts are computed in `lib/dataset.ts`.
+
+This data has no train/test split, because HEARTH trains no model. `lib/dataset-split.ts` lets modellers make one.
+Fuel-level splits are decided across the whole dataset, because propane burned in both ACME and SPICE.
+
+PSI record numbers are not stated in the raw files and could not be confirmed, so the page links to a PSI search
+rather than to a specific record. The files were not compared with PSI's current copies.
+
 ## Open questions
 
 - **Q1 (ACME inverse flow columns):** the two inverse-row flow values (e.g. 1.5 and 5.59) always keep a

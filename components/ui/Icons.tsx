@@ -4,6 +4,9 @@ const base = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke
 export const IconOverview = (p: P) => (
   <svg {...base} className={p.className}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
 );
+export const IconDatabase = (p: P) => (
+  <svg {...base} className={p.className}><ellipse cx="12" cy="5.5" rx="8" ry="3" /><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13" /><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" /></svg>
+);
 export const IconTable = (p: P) => (
   <svg {...base} className={p.className}><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 10h18M9 4v16" /></svg>
 );

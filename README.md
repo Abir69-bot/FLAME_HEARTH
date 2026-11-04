@@ -21,6 +21,7 @@ Every number shown comes from the NASA data or a tested formula, every VESTA cla
 | **Compare** (`/compare`) | 2–3 investigations: coverage radar (formula on each axis), mean conditions, overlay scatter, shared and unique attributes. |
 | **Safety & gaps** (`/safety`) | Six evidence-based rules (oxygen enrichment, untested cabin materials, cool flames, smoke detection, still air & flow control, partial gravity) with documented severity, confidence and sources; O2 × pressure gap heatmap; experiments that would fill each gap; uses on Earth. |
 | **My data lab** (`/lab`) | Your own O2 / pressure / airflow / material: pO2, envelope, heuristic hazard index with its parts, nearest 5 tests; CSV upload kept in the browser only; **DEMO** cabin telemetry with a fire drill (clearly simulated). |
+| **Dataset** (`/dataset`) | Everything about the data: how it is stored, an interactive split explorer, every field with its fill rate and origin, investigation profiles, distributions, raw row vs clean record, quality flags and limits, a repeatable train/test split builder, downloads (CSV, JSON, dictionary) and NASA references with checksums. |
 | **Flame simulator** (`/simulator`) | **DEMO** replays of real tests in microgravity and on Earth. The moving flame is artwork steered by NASA results, not a combustion model; its numbers come from the test rows it cites, and settings with no nearby test show the data gap instead of a flame. |
 | **About** (`/about`) | Investigations, hardware, files, reference atmospheres, credits, limits and how VESTA works. |
 | **VESTA panel** (every page) | Streaming answers with live tool steps, inline charts (pin to dashboard), source chips, confidence tag, engine badge, model menu, Student / Researcher / Engineer levels, proactive alert when the mission changes. |
@@ -57,7 +58,7 @@ Data decisions (column mapping, unit conversions, the shifted ACME inverse-flame
 npm install
 cp .env.example .env.local      # every key is optional
 npm run dev                     # http://localhost:3000
-npm test                        # 130+ vitest tests (providers mocked)
+npm test                        # 145+ vitest tests (providers mocked)
 npm run build
 ```
 Data prep (only if the raw data changes):
@@ -65,6 +66,7 @@ Data prep (only if the raw data changes):
 python -m venv .venv && . .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r scripts/ingest/requirements.txt
 python scripts/ingest/ingest.py
+python -I scripts/ingest/describe_sources.py   # file sizes, checksums and pages for /dataset
 python -m pytest scripts/ingest
 ```
 Evals: start a local server with `VESTA_EVAL_TOKEN=<16+ random chars>` and run `VESTA_EVAL_TOKEN=<same> npx tsx scripts/run-evals.ts --base http://localhost:3000` → `evals/report*.md`.
