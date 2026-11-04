@@ -43,7 +43,7 @@ O2 partial pressure: pO2 = (O2% / 100) × P. ISS reference = 3.087 psi.
 
 ## Architecture (one Next.js app on Vercel)
 - Next.js 14 App Router, TypeScript strict, Tailwind CSS, at the repo root.
-- Charts: `echarts` + `echarts-for-react`. Client state: `zustand`. Doc search: `minisearch`. Validation: `zod` + `zod-to-json-schema`. Tests: `vitest`.
+- Charts: `echarts` + `echarts-for-react`. 3D Habitat relevance map: `three` (loaded only when that view is shown; falls back to the flat chart). Client state: `zustand`. Doc search: `minisearch`. Validation: `zod` + `zod-to-json-schema`. Tests: `vitest`.
 - AI providers (server side only, in Route Handlers that stream Server-Sent Events, Node runtime, `maxDuration` 60):
   - Claude: `@anthropic-ai/sdk`, model `ANTHROPIC_MODEL`.
   - OpenRouter: `openai` SDK with `baseURL` `https://openrouter.ai/api/v1`, model `OPENROUTER_MODEL`.
@@ -53,7 +53,7 @@ O2 partial pressure: pO2 = (O2% / 100) × P. ISS reference = 3.087 psi.
 
 ## Folder layout (target)
 - `app/` pages: `/` overview, `/explorer`, `/compare`, `/safety`, `/lab`, `/about`; `app/api/*` route handlers
-- `components/` layout/, charts/, vesta/, ui/, fx/ (decorative canvas effects, never data)
+- `components/` layout/, charts/, vesta/, ui/, fx/ (decorative canvas effects, never data), map3d/ (3D map scene; its scales are in `lib/map3d.ts`)
 - `lib/data.ts` (load + query processed data), `lib/physics.ts`, `lib/missions.ts`, `lib/safety.ts`, `lib/search.ts`, `lib/types.ts`, `lib/store.ts`
 - `lib/vesta/` `agent.ts` (tool loop, provider-agnostic), `router.ts` (engine chain + fallback), `offline.ts` (Offline mode), `providers/` (`anthropic.ts`, `openai-compat.ts` (shared helper), `openrouter.ts`, `groq.ts`, `gemini.ts`, one shared interface), `system-prompt.md`, `tools/` (one file per tool), `grounding.ts`
 - `scripts/ingest/` Python data prep · `data/processed/` clean data · `docs/` notes · `evals/` VESTA test questions · `tests/` vitest

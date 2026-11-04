@@ -7,6 +7,25 @@
 
 ## Log
 
+### 3D Habitat relevance map (between Phase 5 and Phase 6)
+**Done**
+- Added `three` (user approved). About 149 KB compressed, downloaded only when the 3D view is shown.
+- `components/map3d/`: `engine.ts` (scene, camera, picking, labels), `backdrop.ts` (procedural Earth, Moon, Sun, stars; no image files), `models.ts` (station, base, rover, spacesuit), `HabitatScene.tsx` (React wrapper). `lib/map3d.ts` holds the scales and shared map helpers.
+- Scene: every test is a glowing point with a stem to the floor; a sheet shows every possible pO2; gold level line at the ISS pO2; orange Moon base / rover patch; mission models at their real conditions with clickable labels; camera glides to the active mission.
+- Kept from the flat chart: hover details, click opens the test, VESTA highlights, active mission marker, lab rows (yellow triangles, "not NASA"), merged points with the same size rule. "3D scene / Flat chart" switch; the choice is remembered.
+- 9 new tests (104 in total). Checked in a real browser with real mouse events: hover, click, mission labels, zoom, reset, flat switch, lab rows, 400 px width, no console errors.
+
+**Decisions**
+- Height = pO2 from `pO2()` in lib/physics.ts. Airflow was rejected as the third axis because only SPICE has it, so it could not place ACME or CFI tests.
+- Pressure is logarithmic in 3D (linear in the flat chart) so low-pressure habitats do not bunch together; the axis says so.
+- Earth, Moon, Sun and the model shapes are artwork and the page says so; only the points, the sheet and each model's position are data.
+- The sheet stops at pO2 44 psi, just above the data's maximum (a test checks everything fits). It is not a physical limit.
+- Normal scrolling keeps moving the page; Ctrl + scroll or the +/− buttons zoom. On phones a vertical swipe scrolls and a sideways drag turns the scene.
+- Falls back to the flat chart with no WebGL (no message) or if the 3D context is lost (with a short note). Visitors who prefer reduced motion start on the flat chart and get no idle movement in 3D.
+
+**Problems**
+- Frame rate on a real graphics card is unmeasured: the automated browser here renders in software. Capped at 24 fps on weak devices and 40 fps otherwise.
+
 ### Front-end redesign: space, fire and Team Polaris (between Phase 5 and Phase 6)
 **Done**
 - Backdrop (`components/fx/SpaceBackdrop.tsx`): stars turning slowly around a marked Polaris with the Little Dipper, embers drifting with no "up", a star streak on mission change, an occasional shooting star. Embers speed up while VESTA works.

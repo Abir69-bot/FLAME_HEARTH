@@ -1,48 +1,39 @@
 "use client";
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
+import { INV_COLORS, aggregate, type Agg, type MapData } from "@/lib/map3d";
 import { MISSIONS, getMission } from "@/lib/missions";
 import { ISS_PO2_PSI } from "@/lib/physics";
 import { useHearth } from "@/lib/store";
 import { EChart, useReducedMotion } from "./EChart";
 
-interface MapPoint {
-  test_id: string;
-  investigation: "ACME" | "CFI" | "SPICE";
-  o2_pct: number;
-  pressure_psi: number;
-  flow_cm_s: number | null;
-  fuel: string | null;
-  campaign: string | null;
-  from_doc: boolean;
-}
-interface MapData {
-  points: MapPoint[];
-  not_plotted: { test_id: string; investigation: string; missing: string[] }[];
-  lunar_region: { o2_pct: [number, number]; pressure_psi: [number, number] };
-}
+export { INV_COLORS };
 
-export const INV_COLORS = { ACME: "#4CC9F0", CFI: "#A78BFA", SPICE: "#5EE6A8" } as const;
+const VIEW_KEY = "hearth.map.view";
+type View = "3d" | "flat";
 
-interface Agg {
-  value: [number, number];
-  ids: string[];
-  fuels: string[];
-  inv: string;
-  fromDoc: boolean;
-}
-
-/** Tests at identical conditions are drawn as one point whose size grows with the count. */
-function aggregate(points: MapPoint[]): Agg[] {
-  const m = new Map<string, Agg>();
-  for (const p of points) {
-    const k = `${p.investigation}|${p.pressure_psi}|${p.o2_pct}`;
-    const a = m.get(k) ?? { value: [p.pressure_psi, p.o2_pct], ids: [], fuels: [], inv: p.investigation, fromDoc: p.from_doc };
-    a.ids.push(p.test_id);
-    if (p.fuel && !a.fuels.includes(p.fuel)) a.fuels.push(p.fuel);
-    m.set(k, a);
+function canUse3D(): boolean {
+  try {
+    const c = document.createElement("canvas");
+    return !!(c.getContext("webgl2") || c.getContext("webgl"));
+  } catch {
+    return false;
   }
-  return [...m.values()];
 }
+
+function savedView(): View | null {
+  try {
+    const v = window.localStorage.getItem(VIEW_KEY);
+    return v === "3d" || v === "flat" ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+const Skeleton = () => <div className="h-[400px] animate-pulse rounded-lg bg-raised sm:h-[540px]" />;
+
+/** The 3D engine downloads only when this view is shown. */
+const HabitatScene = dynamic(() => import("@/components/map3d/HabitatScene"), { ssr: false, loading: Skeleton });
 
 export function HabitatMap({ height = 420 }: { height?: number }) {
   const [data, setData] = useState<MapData | null>(null);
@@ -52,6 +43,26 @@ export function HabitatMap({ height = 420 }: { height?: number }) {
   const openTest = useHearth((s) => s.openTest);
   const labRows = useHearth((s) => s.labRows);
   const reduce = useReducedMotion();
+  const [view, setView] = useState<View | null>(null);
+  const [can3D, setCan3D] = useState(true);
+  const [failed3D, setFailed3D] = useState(false);
+
+  // 3D by default; flat when the device cannot do 3D, the visitor prefers less motion, or chose flat before
+  useEffect(() => {
+    const ok = canUse3D();
+    setCan3D(ok);
+    setView(!ok ? "flat" : (savedView() ?? (reduce ? "flat" : "3d")));
+  }, [reduce]);
+
+  const chooseView = (v: View) => {
+    setFailed3D(false);
+    setView(v);
+    try {
+      window.localStorage.setItem(VIEW_KEY, v);
+    } catch {
+      /* storage blocked: the choice just lasts until the page reloads */
+    }
+  };
 
   useEffect(() => {
     fetch("/api/map")
@@ -196,13 +207,63 @@ export function HabitatMap({ height = 420 }: { height?: number }) {
   );
 
   if (err) return <p className="text-sm text-bad">Could not load the map data.</p>;
-  if (!option) return <div style={{ height }} className="animate-pulse rounded-lg bg-raised" />;
+  if (!option || !view) return <Skeleton />;
   const plotted = data!.points.length;
+  const { o2_pct: zoneO2, pressure_psi: zoneP } = data!.lunar_region;
+  const show3D = view === "3d" && can3D && !failed3D;
+  const legend: { name: string; color: string; shape: string }[] = [
+    { name: "ACME", color: INV_COLORS.ACME, shape: "h-2 w-2 rounded-full" },
+    { name: "CFI", color: INV_COLORS.CFI, shape: "h-2 w-2 rounded-full" },
+    { name: "SPICE", color: INV_COLORS.SPICE, shape: "h-2 w-2 rounded-full" },
+    { name: `Same pO2 as ISS (${ISS_PO2_PSI} psi)`, color: "#FFC857", shape: "h-0.5 w-4" },
+    { name: `Moon base / rover zone (${zoneO2[0]}–${zoneO2[1]}% O2, ${zoneP[0]}–${zoneP[1]} psi)`, color: "#FF7A2F", shape: "h-2 w-2 rounded-sm" },
+  ];
   return (
     <div>
-      <EChart option={option} height={height} onEvents={onEvents} ariaLabel={`Habitat relevance map: ${plotted} NASA tests by pressure and oxygen, with mission markers`} />
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <p className="min-w-0 flex-1 basis-64 text-[11px] text-muted">
+          {show3D ? (
+            <>Every NASA test by pressure, O2 and height = pO2 (lib/physics.ts). The glowing sheet is every possible pO2; stems drop to the floor to read the axes. Pressure is on a log scale.</>
+          ) : (
+            <>
+              Every NASA test by pressure and O2. Dashed line: same O2 partial pressure as the ISS ({ISS_PO2_PSI} psi). Shaded box: Moon base / rover zone ({zoneO2[0]}–{zoneO2[1]}% O2, {zoneP[0]}–{zoneP[1]} psi).
+            </>
+          )}
+        </p>
+        {can3D && (
+          <div role="radiogroup" aria-label="Map view" className="flex shrink-0 overflow-hidden rounded-md border border-line text-[11px]">
+            {(["3d", "flat"] as const).map((v) => (
+              <button key={v} type="button" role="radio" aria-checked={view === v} onClick={() => chooseView(v)} className={`px-2.5 py-1 transition ${view === v ? "bg-ember/20 text-ember-soft" : "text-muted hover:text-text"}`}>
+                {v === "3d" ? "3D scene" : "Flat chart"}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      {failed3D && <p className="mb-1 text-[11px] text-warn">The 3D scene could not run on this device, so this is the flat chart.</p>}
+      {show3D ? (
+        <>
+          <HabitatScene data={data!} reduce={reduce} onFail={() => setFailed3D(true)} />
+          <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted" aria-label="Map key">
+            {legend.map((l) => (
+              <li key={l.name} className="flex items-center gap-1.5">
+                <span aria-hidden className={`inline-block ${l.shape}`} style={{ background: l.color }} />
+                {l.name}
+              </li>
+            ))}
+            {labRows.length > 0 && (
+              <li className="flex items-center gap-1.5 text-warn">
+                <span aria-hidden>▲</span>My data (not NASA)
+              </li>
+            )}
+          </ul>
+        </>
+      ) : (
+        <EChart option={option} height={height} onEvents={onEvents} ariaLabel={`Habitat relevance map: ${plotted} NASA tests by pressure and oxygen, with mission markers`} />
+      )}
       <p className="mt-1 text-[11px] text-muted">
-        {plotted} tests plotted (points at identical conditions are merged; size = count). Scroll to zoom, click a point for details.{" "}
+        {plotted} tests plotted (points at identical conditions are merged; size = count).{" "}
+        {show3D ? "Drag to turn, Ctrl + scroll or +/− to zoom, click a point for details. Earth, Moon and Sun are artwork and the mission models are symbols, not to scale: only the points, the sheet and each model's position are data. " : "Scroll to zoom, click a point for details. "}
         {data!.not_plotted.length ? `Not plotted (missing O2 or pressure): ${data!.not_plotted.map((n) => n.test_id).join(", ")}.` : "No test is missing O2 or pressure."}
         {highlight.length > 0 && (
           <button type="button" className="ml-2 text-ember-soft underline" onClick={() => useHearth.getState().setHighlight([])}>
