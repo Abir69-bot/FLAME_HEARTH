@@ -63,7 +63,8 @@ export function classifyError(e: unknown): EngineError {
   const err = e as { status?: unknown; name?: string; message?: string; code?: string };
   const status = typeof err?.status === "number" ? err.status : undefined;
   const text = `${err?.name ?? ""} ${err?.message ?? ""} ${err?.code ?? ""}`.toLowerCase();
-  if (status === 401 || status === 403) return new EngineError("auth");
+  // Gemini answers a bad key with 400 and API_KEY_INVALID rather than 401
+  if (status === 401 || status === 403 || text.includes("api_key_invalid") || text.includes("api key not valid")) return new EngineError("auth");
   if (status === 429 || text.includes("quota") || text.includes("rate limit")) return new EngineError("rate_limit");
   if (status != null && status >= 500) return new EngineError("server");
   if (text.includes("timeout") || text.includes("timed out") || text.includes("abort")) return new EngineError("timeout");

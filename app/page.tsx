@@ -11,10 +11,7 @@ export default function Overview() {
       <MissionHeader />
       <div className="grid gap-5 2xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <section id="tour-map" aria-label="Habitat relevance map" className="animate-fadeUp hud-panel p-4">
-          <h2 className="font-head text-sm font-semibold uppercase tracking-wider text-muted">Habitat relevance map</h2>
-          <p className="mb-2 text-[11px] text-muted">
-            Every NASA test by pressure and O2. Line: same O2 partial pressure as the ISS (3.087 psi). Shaded area: Moon base / rover zone (30–34% O2, 8.2–10.2 psi).
-          </p>
+          <h2 className="mb-1 font-head text-sm font-semibold uppercase tracking-wider text-muted">Habitat relevance map</h2>
           <HabitatMap />
         </section>
         <div className="space-y-5">

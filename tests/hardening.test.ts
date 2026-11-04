@@ -3,7 +3,7 @@ import { POST as vestaPOST } from "@/app/api/vesta/route";
 import { findGaps } from "@/lib/analysis";
 import { memo, RateLimiter } from "@/lib/ratelimit";
 import type { VestaEvent } from "@/lib/vesta/events";
-import type { ChatSession, Provider, ProviderReply } from "@/lib/vesta/providers/types";
+import { classifyError, type ChatSession, type Provider, type ProviderReply } from "@/lib/vesta/providers/types";
 import { clearVestaCache, runVesta } from "@/lib/vesta/router";
 
 function provider(id: Provider["id"], replies: (ProviderReply | Error)[]) {
@@ -38,6 +38,17 @@ async function ask(deps: Parameters<typeof runVesta>[2], q = "hello there") {
 }
 
 beforeEach(() => clearVestaCache());
+
+describe("error classification", () => {
+  it("treats Gemini's 400 API_KEY_INVALID as a rejected key", () => {
+    const gemini = Object.assign(new Error('{"error":{"status":"INVALID_ARGUMENT","message":"API key not valid.","reason":"API_KEY_INVALID"}}'), { status: 400 });
+    expect(classifyError(gemini).kind).toBe("auth");
+  });
+
+  it("does not treat other 400s as key problems", () => {
+    expect(classifyError(Object.assign(new Error("bad request"), { status: 400 })).kind).toBe("other");
+  });
+});
 
 describe("engine cooldown", () => {
   it("skips an engine that just hit its limit, then retries after the cooldown", async () => {

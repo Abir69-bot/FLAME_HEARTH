@@ -602,8 +602,13 @@ export class HabitatEngine {
       const off = this.v.z > 1 || Math.abs(this.v.x) > 1.05 || Math.abs(this.v.y) > 1.05;
       slot.el.style.visibility = off ? "hidden" : "visible";
       if (off) return;
-      const x = (this.v.x * 0.5 + 0.5) * w;
+      let x = (this.v.x * 0.5 + 0.5) * w;
       const y = (-this.v.y * 0.5 + 0.5) * h;
+      // axis labels stay readable near the edge; mission labels keep their own anchors
+      if (center) {
+        const half = slot.el.offsetWidth / 2;
+        x = Math.min(Math.max(x, half), Math.max(half, w - half));
+      }
       slot.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(${slot.anchorX ?? "-50%"}, ${center ? "-50%" : "-100%"})`;
     };
     for (const slot of this.labels) place(slot, true);

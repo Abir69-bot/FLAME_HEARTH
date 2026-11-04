@@ -5,6 +5,7 @@
  *
  * For a local server, start it with VESTA_EVAL_TOKEN=<16+ chars> and run this script with the same
  * variable: eval requests then skip the visitor rate limit and the answer cache. Never set it in production.
+ * VESTA answers one request at a time per visitor, so run one engine list per server: parallel runs against one server get 429s.
  * Checks per question: expected tool used, facts present, sources, confidence (and expected value),
  * grounding (no "could not be verified"), expected dashboard view. If the engine fell back to another
  * engine (limit / outage) the question is reported as "unavailable" and left out of that engine's score.
@@ -31,7 +32,7 @@ const arg = (k: string, d?: string) => {
 const BASE = arg("base", "http://localhost:3000")!;
 const OUT = arg("out", "evals/report.md")!;
 const TOKEN = process.env.VESTA_EVAL_TOKEN;
-const delays: Record<string, number> = { groq: 65, gemini: 15, claude: 2, offline: 0 };
+const delays: Record<string, number> = { openrouter: 30, groq: 65, gemini: 15, claude: 2, offline: 0 };
 for (const d of (arg("delay", "") ?? "").split(",").filter(Boolean)) {
   const [k, v] = d.split("=");
   delays[k] = Number(v);

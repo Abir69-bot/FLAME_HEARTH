@@ -7,6 +7,27 @@
 
 ## Log
 
+### Phase 6, part 2 (partial, not the launch commit)
+**Done**
+- Review: no secrets in git history, no key names in the browser JavaScript. DEMO labels present on the simulator and telemetry.
+- Fallback tested for real with all four keys deliberately broken: the chain ended in Offline with a friendly note and no provider text or key in the stream or server log.
+- Checked in headless Chrome: 7 pages at 400, 1024 and 1440 px with no sideways overflow and no console errors; tour steps, skip and remember.
+- Added `app/error.tsx` and `app/not-found.tsx`. Gemini's 400 API_KEY_INVALID now counts as a rejected key. 3D axis labels stay inside the canvas. README updated (OpenRouter, Flame simulator, 3D map, 889 rows vs 847 test points). 132 tests.
+
+**Decisions**
+- Removed the map caption re-added in part 1: the map already explains itself below the scene.
+- 847 on the site is correct: 889 rows minus 42 flagged duplicates.
+
+**Problems**
+- `next build` fails now and then in the Google Fonts loader (`loader.js:112`), 3 of 9 local builds; a retry passes. Cause not confirmed: 36 samples of Google's font CSS were clean. A failed Vercel build leaves the previous deployment live. Self-hosted fonts would remove the risk but change the `next/font/google` rule, so that needs the user's decision.
+- A first eval attempt ran engines in parallel against one server and got 429s from VESTA's one-request-per-visitor rule, and also spent free AI quota. Run one engine per server.
+- Gemini was rate-limited during this work.
+
+**Next (rest of Phase 6)**
+- Finish the AI-engine evals for `evals/report.md`, tuning the prompt if an engine is under 90%.
+- Run the demo on the live site.
+- Commit "Phase 6: launch", then tag v1.0.
+
 ### Phase 6, part 1 (partial, not the launch commit)
 **Done**
 - Hardening: per-visitor rate limit on `/api/vesta` and memoised results (`lib/ratelimit.ts`); engine cooldown after a failure and a 40 s AI time budget before Offline (`lib/vesta/router.ts`). 6 new tests in `tests/hardening.test.ts` (130 in total).
