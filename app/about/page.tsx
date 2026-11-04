@@ -111,6 +111,7 @@ export default function AboutPage() {
             <li>Ranking scores, severity and the hazard index are HEARTH heuristics with published formulas, not NASA ratings.</li>
             <li>Safety guidelines describe evidence (“evidence suggests…”), never official NASA rules.</li>
             <li>DEMO telemetry and the fire drill are simulated and always labelled DEMO.</li>
+            <li>The Flame simulator&apos;s moving flame is artwork steered by NASA results, labelled DEMO. It is not a combustion model; its numbers come from the test rows it cites.</li>
           </ul>
         </div>
       </section>

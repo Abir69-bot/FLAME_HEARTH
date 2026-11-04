@@ -52,9 +52,9 @@ O2 partial pressure: pO2 = (O2% / 100) × P. ISS reference = 3.087 psi.
 - Data prep (run locally once, again only if raw data changes): Python script `scripts/ingest/ingest.py` (pandas, pdfplumber, pymupdf; requirements in `scripts/ingest/requirements.txt`) writes `data/processed/tests.json`, `chunks.json`, `pdf_tables.json`, `ingest_report.md`.
 
 ## Folder layout (target)
-- `app/` pages: `/` overview, `/explorer`, `/compare`, `/safety`, `/lab`, `/about`; `app/api/*` route handlers
+- `app/` pages: `/` overview, `/explorer`, `/compare`, `/safety`, `/lab`, `/simulator`, `/about`; `app/api/*` route handlers
 - `components/` layout/, charts/, vesta/, ui/, fx/ (decorative canvas effects, never data), map3d/ (3D map scene; its scales are in `lib/map3d.ts`)
-- `lib/data.ts` (load + query processed data), `lib/physics.ts`, `lib/missions.ts`, `lib/safety.ts`, `lib/search.ts`, `lib/types.ts`, `lib/store.ts`
+- `lib/data.ts` (load + query processed data), `lib/physics.ts`, `lib/flame.ts`, `lib/missions.ts`, `lib/safety.ts`, `lib/search.ts`, `lib/types.ts`, `lib/store.ts`
 - `lib/vesta/` `agent.ts` (tool loop, provider-agnostic), `router.ts` (engine chain + fallback), `offline.ts` (Offline mode), `providers/` (`anthropic.ts`, `openai-compat.ts` (shared helper), `openrouter.ts`, `groq.ts`, `gemini.ts`, one shared interface), `system-prompt.md`, `tools/` (one file per tool), `grounding.ts`
 - `scripts/ingest/` Python data prep · `data/processed/` clean data · `docs/` notes · `evals/` VESTA test questions · `tests/` vitest
 

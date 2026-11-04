@@ -7,6 +7,25 @@
 
 ## Log
 
+### Flame simulator (between Phase 5 and Phase 6)
+**Done**
+- New page `/simulator` ("Flame simulator", between My data lab and About; VESTA can open it). No new dependencies: plain WebGL.
+- `lib/flame.ts`: real rows → evidence + animation settings, pure and tested. `GET /api/flame` serves compact rows so sliders respond instantly. `components/flame/`: `shader.ts` (flame), `FlameCanvas.tsx`, `FlameLab.tsx` (page).
+- Three experiments: ACME spherical flame (fuel, flame type, O2, pressure), CFI droplet (fuel, helium, O2, pressure), SPICE jet (fuel, nozzle, fuel rate, air speed). Microgravity, Earth or side by side.
+- ACME replays follow the tests near the settings (same fuel and flame type, ±5 points O2, ±2.5 psi): ignition / flash / failure by majority, median burn time with replay speed, how it ended, cool flames. Colour follows Tad, size follows Zst.
+- Fun: Surprise me (random real test), Longest burn, mission buttons, a clickable map of where real tests happened, 5 challenges, Ask VESTA about the closest test.
+- 19 new tests (123 in total). Checked in a real browser: all modes, no-data zone, 400 px, reduced motion, no WebGL, no console errors.
+
+**Decisions**
+- Labelled DEMO: the moving flame is artwork steered by results, not a combustion model. Every number comes from cited rows. A "How much of this is real?" panel says so.
+- No flame where no test exists (rule 5): the page names the gap and the run that would fill it.
+- Earth view is an illustration with no numbers and no cool flames: all tests ran in microgravity. No Moon or Mars gravity option: no data.
+- CFI's table lists conditions, not results, so its replay has no timer; the sequence comes from CFI_Report p5–p6. SPICE's table does not mark which row reached the smoke point, so soot grows with fuel rate and no threshold is claimed.
+- SPICE settings with no airflow value, a failed range check or zero fuel flow are left out.
+
+**Problems**
+- Smoothness on a real graphics card is unmeasured (the test browser renders in software). Capped at 30 fps on weak devices and 50 otherwise.
+
 ### 3D Habitat relevance map (between Phase 5 and Phase 6)
 **Done**
 - Added `three` (user approved). About 149 KB compressed, downloaded only when the 3D view is shown.

@@ -3,7 +3,7 @@ import { getTest } from "@/lib/data";
 import { getMission } from "@/lib/missions";
 import { defineTool, fail } from "./types";
 
-export const VIEWS = ["overview", "explorer", "compare", "safety", "lab", "about"] as const;
+export const VIEWS = ["overview", "explorer", "compare", "safety", "lab", "simulator", "about"] as const;
 export type View = (typeof VIEWS)[number];
 
 export const VIEW_PATHS: Record<View, string> = {
@@ -12,6 +12,7 @@ export const VIEW_PATHS: Record<View, string> = {
   compare: "/compare",
   safety: "/safety",
   lab: "/lab",
+  simulator: "/simulator",
   about: "/about",
 };
 
