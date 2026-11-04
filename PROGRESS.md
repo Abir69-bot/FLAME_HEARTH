@@ -1,11 +1,35 @@
 # HEARTH progress
 
 ## Status
-- Next phase: 6 (waiting for the user's "go"; the user wants a report + "go" after every phase)
+- Current phase: 6, in progress (partial commit made; "Phase 6: launch" and tag v1.0 still to come). The user wants a report + "go" after every phase.
 - Live URL: https://project-hearth-five.vercel.app
 - AI engines with keys: OpenRouter, Groq and Gemini on Vercel (Production + Preview, added after the user's permission). Claude key empty. The current machine's `.env.local` only has OpenRouter, so locally the chain goes OpenRouter → Offline.
 
 ## Log
+
+### Phase 6, part 1 (partial, not the launch commit)
+**Done**
+- Hardening: per-visitor rate limit on `/api/vesta` and memoised results (`lib/ratelimit.ts`); engine cooldown after a failure and a 40 s AI time budget before Offline (`lib/vesta/router.ts`). 6 new tests in `tests/hardening.test.ts` (130 in total).
+- Eval runner `scripts/run-evals.ts` with an eval-only `x-eval-token` / `VESTA_EVAL_TOKEN` mode. `evals/report-offline.md`: Offline 12/12.
+- Skippable first-visit tour (`components/ui/Tour.tsx`), `app/icon.svg` replaces the favicon, reference atmospheres table on About.
+- `README.md` and `docs/DEMO_SCRIPT.md`.
+- Merged this work with upstream's OpenRouter engine, redesign, 3D map and Flame simulator.
+
+**Decisions**
+- Kept the redesign wherever it conflicted with this work and re-added the local changes on top.
+- The map caption and tour step 2 no longer say "dashed line" / "pulsing diamond", because those only describe the flat chart and the map now opens in 3D.
+
+**Problems**
+- One `next build` failed in the Google Fonts loader (`loader.js:112`, null regex match); later builds passed with no code change, including clean ones. Cause not confirmed; looks transient.
+- The merged site has not been checked in a browser yet.
+- `README.md` still lists the old engine chain (no OpenRouter); `CLAUDE.md` and `.env.example` already include it.
+- This machine's `.env.local` has no `OPENROUTER_API_KEY`.
+
+**Next (rest of Phase 6)**
+- Run the evals on every AI engine for `evals/report.md` (each must reach ≥ 90%).
+- Strict NASA-judge review, including git history and keys reaching the browser.
+- Broken-key fallback test; polish at 400, 1024 and 1440 px; update the README; run the demo on the live site.
+- Commit "Phase 6: launch", then tag v1.0.
 
 ### Flame simulator (between Phase 5 and Phase 6)
 **Done**

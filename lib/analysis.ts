@@ -4,6 +4,7 @@ import { O2_BINS, P_BINS, binIndex, binLabel } from "./bins";
 import { MISSIONS, getMission } from "./missions";
 import { envelopeCheck, nearestTests } from "./physics";
 import { round } from "./util";
+import { memo } from "./ratelimit";
 import { INVESTIGATIONS, type Investigation, type Mission, type Source, type TestRecord } from "./types";
 
 // ------------------------------------------------------------- compare
@@ -56,7 +57,7 @@ export const COVERAGE_AXES = [
 ] as const;
 export type CoverageKey = (typeof COVERAGE_AXES)[number]["key"];
 
-export function coverageRadar(missionId?: string) {
+function coverageRadarImpl(missionId?: string) {
   const m = getMission(missionId) ?? getMission("lunar-rover")!;
   const ranking = rankInvestigations(m);
   const raw: Record<string, Record<CoverageKey, number>> = {};
@@ -141,7 +142,7 @@ export function rankInvestigations(target: { o2_pct: number; pressure_psi: numbe
   return rows.sort((a, b) => b.score - a.score);
 }
 
-export function rankForMission(missionId: string | null | undefined) {
+function rankForMissionImpl(missionId: string | null | undefined) {
   const m = getMission(missionId) ?? getMission("lunar-rover")!;
   return { mission: m, ranking: rankInvestigations(m) };
 }
@@ -165,7 +166,7 @@ const EXPERIMENT_SUGGESTIONS = {
   cell: (c: GapCell) => `No tests at ${c.o2_bin} O2 and ${c.p_bin}: a CIR/ACME-type campaign at these conditions would fill this cell.`,
 };
 
-export function findGaps(missionId?: string) {
+function findGapsImpl(missionId?: string) {
   const ts = countable();
   const grid: GapCell[] = [];
   for (let i = 0; i < O2_BINS.length; i++) {
@@ -219,3 +220,8 @@ export function findGaps(missionId?: string) {
     sources: sourcesFor(ts, 0),
   };
 }
+
+/** Cached: the processed data never changes while the server runs. */
+export const findGaps = memo(findGapsImpl);
+export const rankForMission = memo(rankForMissionImpl);
+export const coverageRadar = memo(coverageRadarImpl);

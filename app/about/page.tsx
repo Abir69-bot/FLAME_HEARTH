@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { PolarisMark } from "@/components/ui/Polaris";
+import { MISSIONS } from "@/lib/missions";
+import { pO2 } from "@/lib/physics";
 
 export const metadata: Metadata = { title: "About" };
 
@@ -113,6 +115,36 @@ export default function AboutPage() {
             <li>DEMO telemetry and the fire drill are simulated and always labelled DEMO.</li>
             <li>The Flame simulator&apos;s moving flame is artwork steered by NASA results, labelled DEMO. It is not a combustion model; its numbers come from the test rows it cites.</li>
           </ul>
+        </div>
+      </section>
+
+      <section className="hud-panel p-4 text-sm">
+        <h2 className="mb-2 font-head text-sm font-semibold uppercase tracking-wider text-muted">Reference atmospheres used in HEARTH</h2>
+        <p className="mb-2 text-xs text-muted">Project assumptions for comparing habitats; pO2 = (O2% / 100) × pressure.</p>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[420px] text-sm">
+            <thead>
+              <tr className="text-left text-[11px] uppercase tracking-wide text-muted">
+                <th className="py-1">Environment</th>
+                <th>O2</th>
+                <th>Pressure</th>
+                <th>pO2</th>
+              </tr>
+            </thead>
+            <tbody className="font-mono text-xs">
+              {MISSIONS.map((m) => (
+                <tr key={m.id} className="border-t border-line/60">
+                  <td className="py-1 font-sans text-sm">
+                    {m.name}
+                    {m.demo && <span className="ml-1 text-[10px] uppercase text-warn">demo</span>}
+                  </td>
+                  <td>{m.id === "lunar-base" ? "≥ 30%" : `${m.o2_pct}%`}</td>
+                  <td>{m.id === "lunar-base" ? "≤ 10.2 psi" : `${m.pressure_psi} psi`}</td>
+                  <td>{pO2(m.o2_pct, m.pressure_psi)} psi</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
 

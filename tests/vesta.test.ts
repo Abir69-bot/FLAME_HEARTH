@@ -339,12 +339,16 @@ describe("offline mode", () => {
     expect(detectIntent("Which investigation is most relevant for the ISS?")).toBe("rank");
     expect(detectIntent("Run a safety audit")).toBe("safety");
     expect(detectIntent("Is 34% at 8.2 psi tested?")).toBe("assess");
+    expect(detectIntent("What is pO2 at 34% O2 and 8.2 psi?")).toBe("calc");
+    expect(detectIntent("How does ISS cabin air compare with the ISS reference pO2?")).toBe("calc");
+    expect(detectIntent("Compare the investigations")).toBe("compare");
     expect(detectIntent("What is a cool flame?")).toBe("explain_topic");
     expect(detectIntent("sing me a song")).toBe("unknown");
   });
 
   const cases: [string, string[]][] = [
-    ["What is pO2 at 34% O2 and 8.2 psi?", ["physics_calc", "envelope_check", "nearest_tests"]],
+    ["What is pO2 at 34% O2 and 8.2 psi?", ["physics_calc"]],
+    ["Is 34% O2 at 8.2 psi inside the tested data?", ["physics_calc", "envelope_check", "nearest_tests"]],
     ["Compare ACME and SPICE", ["compare", "make_chart", "ui_action"]],
     ["What data is missing for the lunar rover?", ["gap_finder", "ui_action"]],
     ["Which investigation is most relevant for the Moon base?", ["rank_investigations", "make_chart", "ui_action"]],

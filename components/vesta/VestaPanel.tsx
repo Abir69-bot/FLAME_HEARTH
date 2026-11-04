@@ -92,7 +92,7 @@ export function VestaPanel() {
         aria-label="VESTA assistant"
         className="relative flex scroll-mt-28 flex-col border-t border-line bg-panel/70 vesta:sticky vesta:top-[49px] vesta:h-[calc(100vh-49px)] vesta:w-[400px] vesta:shrink-0 vesta:border-l vesta:border-t-0"
       >
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-2 border-b border-line bg-gradient-to-b from-ember/10 to-transparent px-3 py-2">
+        <div id="tour-vesta" className="flex flex-wrap items-center gap-x-2 gap-y-2 border-b border-line bg-gradient-to-b from-ember/10 to-transparent px-3 py-2">
           <Orb thinking={busy} size={58} />
           <div className="mr-auto min-w-0">
             <h2 className="font-head text-lg font-bold leading-tight tracking-[0.18em]">VESTA</h2>

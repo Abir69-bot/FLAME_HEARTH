@@ -5,6 +5,7 @@ import { SpaceBackdrop } from "@/components/fx/SpaceBackdrop";
 import { VestaPanel } from "@/components/vesta/VestaPanel";
 import { postMissionAlert } from "@/components/vesta/useVesta";
 import { TestDrawer } from "@/components/ui/TestDrawer";
+import { Tour } from "@/components/ui/Tour";
 import { SideNav } from "./SideNav";
 import { SiteFooter } from "./SiteFooter";
 import { TopBar } from "./TopBar";
@@ -56,6 +57,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <VestaPanel />
       </div>
       <TestDrawer />
+      <Tour />
     </div>
   );
 }

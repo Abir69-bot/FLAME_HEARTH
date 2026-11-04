@@ -13,7 +13,7 @@ import { runTool } from "./tools";
 import type { ChartPayload } from "./tools/make_chart";
 import type { UiEvent } from "./tools/ui_action";
 
-export type Intent = "help" | "explain_test" | "compare" | "gaps" | "rank" | "safety" | "assess" | "explain_topic" | "unknown";
+export type Intent = "help" | "explain_test" | "compare" | "gaps" | "rank" | "safety" | "calc" | "assess" | "explain_topic" | "unknown";
 
 export interface Parsed {
   o2_pct?: number;
@@ -61,11 +61,14 @@ export function detectIntent(msg: string, p: Parsed = parseMessage(msg)): Intent
   const t = msg.toLowerCase().trim();
   if (!t || /^(help|\?|what can you do|hi|hello|hey)\b/.test(t)) return "help";
   if (p.test_ids.length) return "explain_test";
-  if (/\bcompar|\bversus\b|\bvs\.?\b|differen/.test(t) || p.investigations.length >= 2) return "compare";
+  const comparing = /\bcompar|\bversus\b|\bvs\.?\b|differen/.test(t);
+  if ((comparing && (p.investigations.length >= 1 || /investigation|experiment/.test(t))) || p.investigations.length >= 2) return "compare";
   if (/\bgaps?\b|missing|untested|(not|never) (been )?tested|no data|lack/.test(t)) return "gaps";
   if (/\brank|most relevant|relevan|which investigation|best (investigation|data)/.test(t)) return "rank";
   if (/safety|audit|hazard|fire risk|danger|\brisk/.test(t)) return "safety";
-  if (p.o2_pct != null || p.pressure_psi != null || /po2|partial pressure|assess|condition|envelope|tested|safe|cabin/.test(t) || p.mission) return "assess";
+  // a pure calculation (pO2, ratio, conversion) that does not ask about test coverage
+  if (/po2|partial pressure|\bratio\b|calculat|comput|convert/.test(t) && !/tested|envelope|assess|inside|covered|\bdata\b|safe/.test(t)) return "calc";
+  if (p.o2_pct != null || p.pressure_psi != null || /assess|condition|envelope|tested|safe|cabin/.test(t) || p.mission) return "assess";
   if (/what is|what are|what's|explain|how does|how do|why|tell me about|define|describe/.test(t)) return "explain_topic";
   return "unknown";
 }
@@ -174,6 +177,30 @@ async function assess(c: Ctx, p: Parsed, level: Level, safetyMode: boolean): Pro
     }
     c.ui.push({ action: "go_view", view: "safety", path: "/safety" });
   }
+  return out;
+}
+
+async function calc(c: Ctx, p: Parsed, level: Level): Promise<string[]> {
+  const m = getMission(p.mission ?? c.missionId);
+  const o2 = p.o2_pct ?? m?.o2_pct;
+  const pr = p.pressure_psi ?? m?.pressure_psi;
+  if (o2 == null || pr == null) {
+    c.conf.push("no_data");
+    return ['I need an O2 percentage and a pressure for that, e.g. "pO2 at 30% and 10.2 psi".'];
+  }
+  const r = (await call(c, "physics_calc", { o2_pct: o2, pressure_psi: pr, flow_cm_s: p.flow_cm_s })).data as {
+    po2: { value: number; formula: string };
+    ratio_to_iss: { value: number };
+    o2_vs_earth: { value: number };
+    iss_po2_psi: number;
+    flow_regime?: { regime: string; rule: string };
+  };
+  const where = p.o2_pct != null ? `${o2}% O2 and ${pr} psi` : `${m!.short} (${o2}% O2, ${pr} psi)`;
+  const out = [`At ${where}, pO2 = ${r.po2.value} psi (${r.po2.formula}, lib/physics.ts).`];
+  out.push(`That is ${r.ratio_to_iss.value}× the ISS reference pO2 of ${r.iss_po2_psi} psi, and the O2 fraction is ${r.o2_vs_earth.value}× Earth air.`);
+  if (r.flow_regime) out.push(`Airflow ${p.flow_cm_s} cm/s is in the "${r.flow_regime.regime}" regime (${r.flow_regime.rule}).`);
+  if (level === "student") out.push("pO2 is the part of the total pressure that is oxygen: it is what a flame actually “feels”.");
+  out.push("Ask “is it inside the tested data?” to check it against the NASA tests.");
   return out;
 }
 
@@ -307,6 +334,9 @@ export async function runOffline(input: { message: string; missionId?: string; l
       break;
     case "safety":
       lines = await assess(c, p, input.level, true);
+      break;
+    case "calc":
+      lines = await calc(c, p, input.level);
       break;
     case "assess":
       lines = await assess(c, p, input.level, false);

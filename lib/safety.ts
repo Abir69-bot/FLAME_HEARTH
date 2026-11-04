@@ -10,6 +10,7 @@ import { envelopeCheck, ISS_PO2_PSI, pO2 } from "./physics";
 import { searchDocs } from "./search";
 import type { Confidence, Source, TestRecord } from "./types";
 import { round } from "./util";
+import { memo } from "./ratelimit";
 
 export type SafetyCategory = "prevention" | "detection" | "suppression";
 
@@ -203,7 +204,10 @@ export function rulePartialGravity(t: SafetyTarget, tests = countable()): Findin
 
 export const RULES = [ruleOxygenEnrichment, ruleUntestedSolids, ruleCoolFlames, ruleSmokeDetection, ruleStillAir, rulePartialGravity];
 
-export function safetyAudit(t: SafetyTarget): Finding[] {
+function safetyAuditImpl(t: SafetyTarget): Finding[] {
   const tests = countable();
   return RULES.map((r) => r(t, tests)).sort((a, b) => b.severity - a.severity);
 }
+
+/** Cached per target (the data is static). */
+export const safetyAudit = memo(safetyAuditImpl);

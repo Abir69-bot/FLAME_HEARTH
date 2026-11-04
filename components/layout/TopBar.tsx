@@ -30,7 +30,7 @@ export function TopBar() {
           <span className="font-head text-lg font-bold tracking-wider">HEARTH</span>
         </Link>
         <TeamBadge />
-        <nav aria-label="Mission" className="order-3 flex w-full gap-1.5 overflow-x-auto pb-0.5 sm:order-none sm:w-auto">
+        <nav id="tour-missions" aria-label="Mission" className="order-3 flex w-full gap-1.5 overflow-x-auto pb-0.5 sm:order-none sm:w-auto">
           {MISSIONS.map((m) => {
             const active = m.id === missionId;
             return (

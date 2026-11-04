@@ -2,6 +2,7 @@ import { z } from "zod";
 import { apiError } from "@/lib/api";
 import { sse, type VestaEvent } from "@/lib/vesta/events";
 import { runVesta } from "@/lib/vesta/router";
+import { vestaLimiter } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -43,6 +44,11 @@ export async function POST(req: Request) {
 
   const visitor = visitorId(req);
   if (busy.has(visitor)) return apiError("VESTA is still answering your previous question.", 429);
+  // Local eval runs only: a matching x-eval-token (set via VESTA_EVAL_TOKEN on that server) skips the limit and cache.
+  const evalToken = process.env.VESTA_EVAL_TOKEN;
+  const evalMode = !!evalToken && evalToken.length >= 16 && req.headers.get("x-eval-token") === evalToken;
+  const wait = evalMode ? 0 : vestaLimiter.check(visitor);
+  if (wait) return apiError(`You've asked VESTA a lot of questions in a short time. Please wait about ${wait} seconds and try again.`, 429);
   busy.add(visitor);
 
   const encoder = new TextEncoder();
@@ -59,6 +65,7 @@ export async function POST(req: Request) {
         await runVesta(
           { messages: parsed.data.messages, missionId: parsed.data.mission, level: parsed.data.level, engine: parsed.data.engine },
           send,
+          { useCache: !evalMode, strict: evalMode },
         );
       } catch {
         send({ type: "error", message: "VESTA could not answer right now. Please try again." });

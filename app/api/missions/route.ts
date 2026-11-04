@@ -11,6 +11,6 @@ export function GET() {
       po2_psi: pO2(m.o2_pct, m.pressure_psi),
       ratio_to_iss: ratioToISS(m.o2_pct, m.pressure_psi).value,
     })),
-    source: { file: "CLAUDE.md", note: "HEARTH reference atmospheres" },
+    source: { file: "lib/missions.ts", note: "HEARTH reference atmospheres (project assumptions)" },
   });
 }
