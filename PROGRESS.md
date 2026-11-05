@@ -7,6 +7,25 @@
 
 ## Log
 
+### HEARTH Blueprint (added at the user's request, during Phase 6)
+**Done**
+- One self-contained animated page, `public/blueprint.html` (served at `/blueprint.html`, also opens by double-click). It explains the whole system: raw NASA files, cleaning, the split, the JSON "database", every page's data trail, VESTA, the honesty rules, deployment and project history, with Simple and Engineer views. No new dependencies.
+- `scripts/blueprint/`: `scan.ts` imports the real modules for facts and traces imports; `stories.ts` holds all the text; `render.ts` and `build.ts` write the file; `watch.ts` serves a live version at localhost:4321; `page.js`, `logic.js`, `style.css` and `template.html` are the page.
+- Real recordings at scan time, with no keys and no AI: 7 Offline answers, 81 engine failure mixes through the real router, and a scripted model whose invented number the real grounding check catches.
+- Updates itself: `prebuild` runs the scan on every local and Vercel build.
+- `tests/blueprint.test.ts` (14 tests) fails on unexplained items, a stale file, hand-typed numbers in stories, broken file links, a browser rule that differs from `lib/physics.ts`, or anything shaped like a key.
+- Checked in headless Chrome at 400, 768, 1024 and 1440 px, both views: no sideways overflow, no console errors, all interactions, reduced motion.
+
+**Decisions**
+- Plain HTML/CSS/JS with inline SVG, so one file works anywhere. Fonts load without blocking the page.
+- The scan can never stop a deploy: `--safe` and `|| exit 0` keep the last good page. Vercel does not run tests, so the Blueprint test cannot block a deploy either.
+- Page trails stop at `useVesta`, and importing only a constant from a component does not count as using it, because either would overstate what a page uses. A separate "On every page" trail shows the shell and VESTA.
+- No link to the page was added to the site's navigation, so existing pages stay unchanged.
+
+**Problems**
+- Test counts on the page are test blocks counted from the source, lower than vitest's total because some blocks run several cases. The page says so.
+- This machine still has no Node on PATH; a portable Node 22 in a temp folder was used again (checksum verified).
+
 ### Dataset page (added during Phase 6 at the user's request)
 **Done**
 - New page `/dataset` ("Dataset", right after My data lab; VESTA can open it). No new dependencies.

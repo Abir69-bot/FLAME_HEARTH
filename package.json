@@ -4,11 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "tsx scripts/blueprint/build.ts --safe || exit 0",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
-    "evals": "tsx scripts/run-evals.ts"
+    "evals": "tsx scripts/run-evals.ts",
+    "blueprint": "tsx scripts/blueprint/build.ts",
+    "blueprint:watch": "tsx scripts/blueprint/watch.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.4.0",

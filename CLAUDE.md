@@ -56,6 +56,7 @@ O2 partial pressure: pO2 = (O2% / 100) × P. ISS reference = 3.087 psi.
 - `components/` layout/, charts/, vesta/, ui/, fx/ (decorative canvas effects, never data), map3d/ (3D map scene; its scales are in `lib/map3d.ts`)
 - `lib/data.ts` (load + query processed data), `lib/physics.ts`, `lib/flame.ts`, `lib/missions.ts`, `lib/safety.ts`, `lib/search.ts`, `lib/types.ts`, `lib/store.ts`
 - `lib/vesta/` `agent.ts` (tool loop, provider-agnostic), `router.ts` (engine chain + fallback), `offline.ts` (Offline mode), `providers/` (`anthropic.ts`, `openai-compat.ts` (shared helper), `openrouter.ts`, `groq.ts`, `gemini.ts`, one shared interface), `system-prompt.md`, `tools/` (one file per tool), `grounding.ts`
+- `scripts/blueprint/` the live system map: `scan.ts` reads the project, `stories.ts` holds the plain-language text, `render.ts` + `build.ts` write `public/blueprint.html`
 - `scripts/ingest/` Python data prep · `data/processed/` clean data · `docs/` notes · `evals/` VESTA test questions · `tests/` vitest
 
 ## Clean data model (`data/processed/tests.json`, one object per test run)
@@ -110,6 +111,7 @@ Calm, precise, a little dry humour. Speaks first when it sees a hazard. Three ex
 ## Commands
 - `npm run dev` (local site at http://localhost:3000) · `npm run build` · `npm run lint` · `npm test`
 - Data prep: `python3 -m venv .venv && . .venv/bin/activate && pip install -r scripts/ingest/requirements.txt && python scripts/ingest/ingest.py`
+- Blueprint: `npm run blueprint` (rebuild once) · `npm run blueprint:watch` (live at http://localhost:4321). `npm run build` rebuilds it automatically.
 - Deploy: push to `main` (auto) or `npx vercel --prod`
 
 ## How Claude Code works here
@@ -121,4 +123,5 @@ Calm, precise, a little dry humour. Speaks first when it sees a hazard. Three ex
 6. Ask before adding big new dependencies or changing the architecture.
 7. When the user must act (log in, approve in a browser), STOP and give short numbered steps, then wait.
 8. Keys: add every key that is set in `.env.local` to Vercel (Production and Preview) by piping the value into `npx vercel env add`, never showing it. When the user adds a new key later, do the same and redeploy.
-9. End of every phase: update `PROGRESS.md` (Done · Decisions · Problems · Next), then `git add -A`, `git commit -m "Phase N: <summary>"`, `git push origin main`, and report the Vercel URL.
+9. Blueprint (`public/blueprint.html`, generated; never edit it by hand): when you add or remove a page, API route, VESTA tool, engine, lib module, shell component or dependency, or change how the pipeline works, update `scripts/blueprint/stories.ts` and run `npm run blueprint`. Never type a number into a story: use `{{factName}}` from `scan.ts`. `tests/blueprint.test.ts` fails if it is out of step.
+10. End of every phase: update `PROGRESS.md` (Done · Decisions · Problems · Next), then `git add -A`, `git commit -m "Phase N: <summary>"`, `git push origin main`, and report the Vercel URL.
