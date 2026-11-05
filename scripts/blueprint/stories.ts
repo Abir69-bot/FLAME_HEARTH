@@ -97,7 +97,7 @@ export const STORIES = {
       title: "How VESTA answers a question",
       intro: {
         s: "VESTA isn't allowed to answer from memory. It has to use tools that read the NASA data, and a checker reads its answer before you do. Pick a question and watch a real answer being built.",
-        e: "A provider-agnostic tool loop runs behind a fallback router. Every engine shares one system prompt, one zod-defined tool set and one grounding check, and emits the same SSE events. Groq's free tier gets a shorter version of the tool list to stay inside its token limit.",
+        e: "A provider-agnostic tool loop runs behind a fallback router. Every engine shares one system prompt, one zod-defined tool set and one grounding check, and emits the same SSE events.",
       } as Story,
     },
     honesty: {
@@ -213,7 +213,7 @@ export const STORIES = {
       jump: "vesta",
       story: {
         s: "The crewmate who explains it all. VESTA can also move the dashboard around for you, and it speaks first when it spots a hazard.",
-        e: "`lib/vesta/agent.ts` runs the tool loop (at most {{maxToolRounds}} rounds on hosted engines, more on local Claude Code) and `grounding.ts` verifies the numbers. Results stream as Server-Sent Events from `/api/vesta`.",
+        e: "`lib/vesta/agent.ts` runs the tool loop (at most {{maxToolRounds}} rounds) and `grounding.ts` verifies the numbers. Results stream as Server-Sent Events from `/api/vesta`.",
       } as Story,
       files: ["lib/vesta/agent.ts", "lib/vesta/grounding.ts", "lib/vesta/system-prompt.md", "app/api/vesta/route.ts"],
     },
@@ -222,10 +222,10 @@ export const STORIES = {
       sub: "{{aiEngineCount}} AI + Offline",
       jump: "chain",
       story: {
-        s: "If one AI service is busy or down, VESTA quietly moves to the next. The last in line needs no AI at all, so VESTA always has an answer. There is one extra choice, Claude Code: it only works on a computer running the site with Claude Code logged in, and only when you pick it by hand.",
-        e: "`lib/vesta/router.ts` walks the chain on a missing key, auth errors, rate limits, server errors, timeouts or bad tool output, and failed engines cool down. Offline is rule-based and needs no network. Claude Code is outside the Auto chain and never available on Vercel: `providers/claude-code.ts` runs the local CLI with no built-in tools, no MCP servers, no settings and no secrets in its environment, so its only reach is VESTA's tools. It has longer time limits and more tool rounds than the hosted engines, and falls back down the same chain.",
+        s: "If one AI service is busy or down, VESTA quietly moves to the next. The last in line needs no AI at all, so VESTA always has an answer.",
+        e: "`lib/vesta/router.ts` walks the chain on a missing key, auth errors, rate limits, server errors, timeouts or bad tool output, and failed engines cool down. Offline is rule-based and needs no network.",
       } as Story,
-      files: ["lib/vesta/router.ts", "lib/vesta/engines.ts", "lib/vesta/offline.ts", "lib/vesta/providers", "lib/vesta/providers/claude-code.ts", "lib/vesta/claude-code-cli.ts"],
+      files: ["lib/vesta/router.ts", "lib/vesta/engines.ts", "lib/vesta/offline.ts", "lib/vesta/providers"],
     },
     repo: {
       label: "GitHub",
@@ -357,16 +357,13 @@ export const STORIES = {
     "lib/dataset-export.ts": same("Builds the downloadable data files."),
     "lib/dataset-split.ts": same("Makes train/test splits and CSV exports."),
     "lib/dataset.ts": same("Computes every statistic on the Dataset page."),
-    "lib/fields.ts": same("The columns VESTA can analyse, including ones specific to one experiment, and what each one means."),
     "lib/flame.ts": same("Turns real tests into flame simulator results."),
     "lib/map3d.ts": same("The scales and geometry for the 3D map."),
-    "lib/mathexpr.ts": same("A small, safe calculator. It understands arithmetic and nothing else, so a typed formula can never run code."),
     "lib/missions.ts": same("The reference atmospheres: ISS, Moon base, rover, spacesuit."),
     "lib/physics.ts": same("The tested formulas: pO2, ratios, unit conversion, envelope check."),
     "lib/ratelimit.ts": same("Limits requests per visitor and remembers finished calculations."),
     "lib/safety.ts": same("The rules behind prevention, detection and suppression findings."),
     "lib/search.ts": same("Full-text search over the PDF passages."),
-    "lib/stats.ts": same("The tested statistics formulas: averages, correlation, regression and significance. If a result cannot be computed it says so."),
     "lib/store.ts": same("The browser's shared memory: mission, engine, messages, level."),
     "lib/vesta": same("VESTA's router, agent, tools, grounding check and Offline mode."),
   } as Record<string, Story>,
@@ -382,10 +379,6 @@ export const STORIES = {
     gap_finder: same("Finds the conditions and fuels nobody has tested."),
     safety_audit: same("Lists prevention, detection and suppression findings with evidence."),
     make_chart: same("Draws a chart from tool numbers. Invalid charts are rejected."),
-    chart_data: same("Draws a chart straight from every matching test, so nothing is copied by hand. Untested combinations stay empty, never zero."),
-    analyze_data: same("Statistics across every matching test: spread, correlation, fits, groups and significance. It refuses to predict outside the tested range."),
-    math_eval: same("A calculator for numbers VESTA already has. It refuses numbers that did not come from a tool or from you."),
-    read_doc_page: same("Reads a whole page of a NASA PDF, with its tables, when a short passage is not enough."),
     ui_action: same("Moves the dashboard: opens a page, sets a mission, highlights tests."),
   } as Record<string, Story>,
 
@@ -436,7 +429,7 @@ export const STORIES = {
       title: "AI engines",
       points: [
         same("The model reads your question and the rules, and picks tools."),
-        same("Tools return real numbers. It can go round up to {{maxToolRounds}} times, or more on local Claude Code."),
+        same("Tools return real numbers. It can go round up to {{maxToolRounds}} times."),
         same("It writes an answer, and the grounding check reads it."),
       ],
     },

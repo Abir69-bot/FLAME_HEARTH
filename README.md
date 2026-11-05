@@ -34,16 +34,10 @@ Every number shown comes from the NASA data or a tested formula, every VESTA cla
 | 3. Groq (free) | `GROQ_API_KEY` is set | `openai` SDK on Groq's API, default `openai/gpt-oss-120b` |
 | 4. Gemini (free) | `GEMINI_API_KEY` is set | `@google/genai`, `GEMINI_MODEL` (e.g. `gemini-flash-latest`) |
 | 5. Offline mode | always | Rule-based: intent router + number extraction → same tools → templated answer. No AI, never fails. |
-| Claude Code (outside the chain) | Picked by hand, on a computer running the site with Claude Code logged in | Local only, never on Vercel. See below. |
 
 **Auto** tries the engines in order and uses the first that works. VESTA moves to the next engine on a missing key, 401/403, 404 model, 429 limit, 5xx, a 20 s timeout, a model that cannot call tools or invalid tool calls; an engine that just failed is skipped for a minute, and after 40 s VESTA answers with Offline mode so a reply always arrives. A small note says what happened ("Groq limit reached, answered with Gemini"). Raw provider errors are never shown and keys never leave the server.
 
-Every engine uses the same system prompt (`lib/vesta/system-prompt.md`), the same tools (zod schemas converted once with zod-to-json-schema; Groq's free tier gets a shorter version of the list) and the same **grounding check**: every number in an answer must appear in a tool result or the user's message, or VESTA is asked to fix it once and then the answer is flagged "Some figures could not be verified" with confidence lowered.
-
-### Claude Code engine (local)
-Run the site with `npm run dev` on a computer where Claude Code is installed and logged in, then pick **Claude Code** in the VESTA menu. Answers use your own Claude plan, take roughly 30 to 70 seconds, and can run more tool rounds and read longer results than the hosted engines, which suits statistics and multi-chart questions. If it fails, VESTA falls back down the normal chain. On the public site it shows as "local only".
-
-Question text is untrusted, so each run has no built-in tools, no MCP servers, no settings, no secrets in its environment and an empty temp folder as its working directory. It can only reach the data through VESTA's tools, and its answers pass the same grounding check. `VESTA_CLAUDE_CODE_MODEL` (default `opus`) and `VESTA_CLAUDE_CODE_EFFORT` are optional.
+Every engine uses the same system prompt (`lib/vesta/system-prompt.md`), the same 11 tools (zod schemas converted once with zod-to-json-schema) and the same **grounding check**: every number in an answer must appear in a tool result or the user's message, or VESTA is asked to fix it once and then the answer is flagged "Some figures could not be verified" with confidence lowered.
 
 Tools: `query_data`, `search_docs`, `physics_calc`, `nearest_tests`, `envelope_check`, `compare`, `rank_investigations`, `gap_finder`, `safety_audit`, `make_chart`, `ui_action`.
 

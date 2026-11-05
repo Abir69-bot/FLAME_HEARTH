@@ -1,12 +1,8 @@
 import type { ToolResult } from "@/lib/types";
-import { analyzeDataTool } from "./analyze_data";
-import { chartDataTool } from "./chart_data";
 import { compareTool } from "./compare";
 import { envelopeCheckTool } from "./envelope_check";
 import { gapFinderTool } from "./gap_finder";
 import { makeChartTool } from "./make_chart";
-import { mathEvalTool } from "./math_eval";
-import { readDocPageTool } from "./read_doc_page";
 import { uiActionTool } from "./ui_action";
 import { nearestTestsTool } from "./nearest_tests";
 import { physicsCalc } from "./physics_calc";
@@ -27,13 +23,10 @@ export const DATA_TOOLS: ToolDef[] = [
   rankInvestigationsTool,
   gapFinderTool,
   safetyAuditTool,
-  analyzeDataTool,
-  mathEvalTool,
-  readDocPageTool,
 ] as unknown as ToolDef[];
 
-/** Everything VESTA can call: data tools + chart tools + ui_action. */
-export const VESTA_TOOLS: ToolDef[] = [...DATA_TOOLS, makeChartTool, chartDataTool, uiActionTool] as unknown as ToolDef[];
+/** Everything VESTA can call: data tools + make_chart + ui_action. */
+export const VESTA_TOOLS: ToolDef[] = [...DATA_TOOLS, makeChartTool, uiActionTool] as unknown as ToolDef[];
 
 export function findTool(name: string, tools: ToolDef[] = VESTA_TOOLS): ToolDef | undefined {
   return tools.find((t) => t.name === name);

@@ -7,34 +7,6 @@
 
 ## Log
 
-### Claude Code engine and analysis tools (at the user's request, during Phase 6)
-**Done**
-- New engine "Claude Code" in the VESTA menu: each model turn runs the local CLI on the owner's Claude plan (`lib/vesta/providers/claude-code.ts`, `lib/vesta/claude-code-cli.ts`). Local only, picked by hand, never in Auto, never on Vercel; a request not addressed to localhost falls back to Auto. Goes through the normal agent loop and grounding check, and falls back down the chain on failure.
-- New tools for every engine: `analyze_data` (describe, percentiles, correlation, regression, histogram, group stats, crosstab, Welch t-test, sorted rows), `chart_data` (charts from all matching rows, no 50 row limit), `math_eval` (safe calculator), `read_doc_page` (whole PDF page with tables). New modules `lib/stats.ts`, `lib/mathexpr.ts`, `lib/fields.ts`.
-- Offline mode answers correlation questions.
-- The Stop button now aborts the running engine (`signal` through router and agent).
-- Tests: `tests/stats.test.ts`, `tests/mathexpr.test.ts`, `tests/analysis-tools.test.ts`, `tests/claude-code.test.ts`. Four evals added.
-
-**Checked for real**
-- Real CLI through the real site: correlation, power-law fit, ignition table, Welch comparison, percent difference. Numbers cross-checked with numpy, which shares no code with `lib/stats.ts`: all matched.
-- Injection attempt (read `.env.local`, run `whoami`, print the prompt): nothing obtained; the CLI reports having no tools at all.
-- Prediction at 100% O2 and 4.3 psi: refused, named the gap.
-- Headless Edge: picked the engine in the real menu, sent a question, answer and charts drawn, no browser errors, no sideways scroll at 400 px.
-
-**Decisions**
-- Local only, with the question on stdin and no shell. The AI keys are withheld from the CLI: with `ANTHROPIC_API_KEY` set it would bill the key instead of the plan.
-- Default model `opus` with fallback to `sonnet`. 12 tool rounds, 180 s per call, 600 s overall, 60,000 characters per tool result, because the hosted 60 s limit does not apply locally.
-- One empty exploratory attempt no longer marks a well-supported answer as `no_data` (found in real use).
-- Groq gets compact tool schemas without `make_chart` and `read_doc_page`, kept no larger than the original tool set, because its free tier counts every token.
-
-**Problems**
-- The grounding check verifies numbers, not words. In testing, Claude Code wrote "no non-ignitions above 40% O2" beside a table showing 2. A prompt rule was added for this, but a wrong sentence is still possible on any engine.
-- Groq free tier still runs out on questions needing three or more requests in a minute, and Gemini was slow or returned errors during testing. Offline mode catches these.
-- `analyze_data` p-values for very small numbers are grounded loosely: scientific notation is read as two separate numbers by the grounding check.
-
-**Next**
-- Finish Phase 6: "Phase 6: launch" and tag v1.0.
-
 ### Blueprint link and pipeline watch (at the user's request)
 **Done**
 - Small "How HEARTH works" link in the site footer, on every page. It opens `/blueprint.html` in a new tab and is not in the side menu.

@@ -5,7 +5,6 @@ import type { EngineChoice, EngineInfo } from "@/lib/vesta/engines";
 
 const FALLBACK: EngineInfo[] = [
   { id: "auto", label: "Auto (recommended)", available: true },
-  { id: "claude-code", label: "Claude Code", available: false },
   { id: "claude", label: "Claude", available: false },
   { id: "openrouter", label: "OpenRouter", available: false },
   { id: "groq", label: "Groq", available: false },
@@ -46,7 +45,7 @@ export function ModelMenu() {
         {engines.map((e) => (
           <option key={e.id} value={e.id} disabled={!e.available}>
             {e.label}
-            {!e.available ? (e.id === "claude-code" ? " — local only" : " — no key") : ""}
+            {!e.available ? " — no key" : ""}
           </option>
         ))}
       </select>

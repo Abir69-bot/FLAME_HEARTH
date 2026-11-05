@@ -2,7 +2,6 @@
  * Offline mode: no AI. Detects the intent, pulls numbers from the message, calls the same tools
  * and fills a template. Every number in the text comes from a tool result or the user's message.
  */
-import { fieldLabel } from "@/lib/fields";
 import { getMission, MISSIONS } from "@/lib/missions";
 import { convertPressure, type PressureUnit } from "@/lib/physics";
 import type { Confidence, Investigation, Source, ToolResult } from "@/lib/types";
@@ -14,7 +13,7 @@ import { runTool } from "./tools";
 import type { ChartPayload } from "./tools/make_chart";
 import type { UiEvent } from "./tools/ui_action";
 
-export type Intent = "help" | "explain_test" | "stats" | "compare" | "gaps" | "rank" | "safety" | "calc" | "assess" | "explain_topic" | "unknown";
+export type Intent = "help" | "explain_test" | "compare" | "gaps" | "rank" | "safety" | "calc" | "assess" | "explain_topic" | "unknown";
 
 export interface Parsed {
   o2_pct?: number;
@@ -58,34 +57,10 @@ export function parseMessage(msg: string): Parsed {
   };
 }
 
-/** Everyday words for the columns Offline mode can correlate. */
-const FIELD_WORDS: [string, RegExp][] = [
-  ["tad_k", /flame temperature|adiabatic/],
-  ["peak_burner_t_c", /burner temperature/],
-  ["burn_time_s", /burn(ing)? time/],
-  ["hc_fuel_rate_mg_s", /fuel rate/],
-  ["pressure_psi", /\bpressure\b/],
-  ["flow_cm_s", /\bair ?flow\b|\bflow\b/],
-  ["size_mm", /burner size|nozzle|\bdiameter\b/],
-  ["o2_pct", /\bo2\b|\boxygen\b/],
-];
-
-/** The two columns a message asks to relate, in the order they were written; fewer than two means not this intent. */
-export function statFields(msg: string): string[] {
-  const t = msg.toLowerCase();
-  if (!/correl|regress|relationship|related to|depend/.test(t)) return [];
-  return FIELD_WORDS.map(([f, re]) => [f, t.search(re)] as const)
-    .filter(([, at]) => at >= 0)
-    .sort((a, b) => a[1] - b[1])
-    .map(([f]) => f)
-    .slice(0, 2);
-}
-
 export function detectIntent(msg: string, p: Parsed = parseMessage(msg)): Intent {
   const t = msg.toLowerCase().trim();
   if (!t || /^(help|\?|what can you do|hi|hello|hey)\b/.test(t)) return "help";
   if (p.test_ids.length) return "explain_test";
-  if (statFields(msg).length === 2) return "stats";
   const comparing = /\bcompar|\bversus\b|\bvs\.?\b|differen/.test(t);
   if ((comparing && (p.investigations.length >= 1 || /investigation|experiment/.test(t))) || p.investigations.length >= 2) return "compare";
   if (/\bgaps?\b|missing|untested|(not|never) (been )?tested|no data|lack/.test(t)) return "gaps";
@@ -141,27 +116,9 @@ const HELP =
   "• Gaps: \"What data is missing for the lunar rover?\"\n" +
   "• Rank: \"Which investigation is most relevant for the Moon base?\"\n" +
   "• Safety audit: \"Run a safety audit for the rover\"\n" +
-  "• Correlation: \"Is flame temperature correlated with O2 in ACME?\"\n" +
   "• Explain a test or a topic: \"Explain ACME-CFIG-128\", \"What is a cool flame?\"";
 
 // ------------------------------------------------------------------ intents
-async function stats(c: Ctx, p: Parsed, msg: string): Promise<string[]> {
-  const [x, y] = statFields(msg);
-  const filter = p.investigations.length ? { investigation: p.investigations } : {};
-  const r = await call(c, "analyze_data", { ...filter, operation: "correlation", x, y });
-  const d = r.data as { n: number; pearson: { r: number; p: number | null } | null; spearman: { r: number } | null; notes?: string[] } | null;
-  if (!r.ok || !d) return ["I could not run that calculation."];
-  const where = p.investigations.length ? p.investigations.join(" and ") : "all investigations";
-  const names = `${fieldLabel(x)} and ${fieldLabel(y)} in ${where}`;
-  if (!d.pearson) return [`${names}: not computable from ${d.n} paired tests. There are too few, or one of the two does not vary.`, ...(d.notes ?? [])];
-  // Oxygen reads best along the bottom, whichever way round the question was asked.
-  const [cx, cy] = y === "o2_pct" ? [y, x] : [x, y];
-  await call(c, "chart_data", { ...filter, chart: "scatter", title: `${fieldLabel(cy)} vs ${fieldLabel(cx)}`.slice(0, 80), x: cx, y: cy, fit: true });
-  const range = r.sources.find((s) => s.rows);
-  const where_from = range ? `(${short(range.file)} rows ${range.rows})` : cite(r.sources[0]);
-  return [`${names}, ${d.n} paired tests: Pearson r = ${d.pearson.r} (p = ${d.pearson.p}), Spearman r = ${d.spearman?.r} ${where_from}.`, ...(d.notes ?? [])];
-}
-
 async function assess(c: Ctx, p: Parsed, level: Level, safetyMode: boolean): Promise<string[]> {
   const m = getMission(p.mission ?? c.missionId);
   const o2 = p.o2_pct ?? m?.o2_pct;
@@ -362,9 +319,6 @@ export async function runOffline(input: { message: string; missionId?: string; l
     case "help":
     case "unknown":
       lines = [intent === "unknown" ? `I couldn't match that to something I can answer offline. ${HELP}` : HELP];
-      break;
-    case "stats":
-      lines = await stats(c, p, input.message);
       break;
     case "explain_test":
       lines = await explainTest(c, p);

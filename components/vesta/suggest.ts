@@ -11,10 +11,6 @@ const TOOL_LABELS: Record<string, string> = {
   safety_audit: "Running the safety audit",
   gap_finder: "Looking for data gaps",
   make_chart: "Drawing a chart",
-  chart_data: "Charting the test data",
-  analyze_data: "Running the statistics",
-  math_eval: "Calculating",
-  read_doc_page: "Reading a NASA document page",
   ui_action: "Updating the dashboard",
 };
 

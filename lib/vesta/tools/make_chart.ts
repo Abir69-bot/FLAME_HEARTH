@@ -27,13 +27,10 @@ export type MakeChartArgs = z.infer<typeof MakeChartInput>;
 const PALETTE = ["#4CC9F0", "#A78BFA", "#5EE6A8", "#FF7A2F", "#FFC857", "#FF5D6C", "#FFB98A", "#97A3BC"];
 const AXIS = {
   axisLine: { lineStyle: { color: "#1F2A44" } },
-  axisLabel: { color: "#97A3BC", fontSize: 10, hideOverlap: true },
+  axisLabel: { color: "#97A3BC" },
   splitLine: { lineStyle: { color: "#1F2A44" } },
-  nameTextStyle: { color: "#97A3BC", fontSize: 10 },
+  nameTextStyle: { color: "#97A3BC" },
 };
-/** Axis names sit beside the axis, not at its end, where the narrow chat panel would clip them or run them into the legend. */
-const X_NAME = { nameLocation: "middle", nameGap: 24 };
-const Y_NAME = { nameLocation: "middle", nameGap: 40 };
 
 export interface ChartPayload {
   id: string;
@@ -63,10 +60,10 @@ export function buildOption(a: MakeChartArgs): Record<string, unknown> {
   const base = {
     backgroundColor: "transparent",
     color: PALETTE,
-    title: { text: a.title, left: 0, textStyle: { color: "#E8ECF6", fontSize: 12, width: 290, overflow: "truncate" } },
+    title: { text: a.title, textStyle: { color: "#E8ECF6", fontSize: 13 } },
     tooltip: { trigger: a.type === "scatter" || a.type === "heatmap" ? "item" : "axis" },
-    legend: a.series.length > 1 ? { type: "scroll", top: 22, textStyle: { color: "#97A3BC", fontSize: 10 } } : undefined,
-    grid: { left: 22, right: 14, top: a.series.length > 1 ? 52 : 34, bottom: a.type === "heatmap" ? 52 : 28, containLabel: true },
+    legend: a.series.length > 1 ? { top: 22, textStyle: { color: "#97A3BC" } } : undefined,
+    grid: { left: 48, right: 16, top: a.series.length > 1 ? 56 : 40, bottom: 40, containLabel: true },
     animationDuration: 700,
   };
   if (a.type === "radar") {
@@ -86,31 +83,29 @@ export function buildOption(a: MakeChartArgs): Record<string, unknown> {
     const vals = a.series.flatMap((s) => (s.cells ?? []).map((c) => c[2]));
     return {
       ...base,
-      xAxis: { type: "category", data: a.categories ?? [], name: a.x_label, ...X_NAME, ...AXIS },
-      yAxis: { type: "category", data: a.y_categories ?? [], name: a.y_label, ...Y_NAME, nameGap: 44, ...AXIS },
-      visualMap: { min: Math.min(0, ...vals), max: Math.max(1, ...vals), text: [String(Math.max(1, ...vals)), String(Math.min(0, ...vals))], orient: "horizontal", left: "center", bottom: 0, itemWidth: 10, itemHeight: 90, textStyle: { color: "#97A3BC" }, inRange: { color: ["#131B2E", "#FF7A2F"] } },
+      xAxis: { type: "category", data: a.categories ?? [], name: a.x_label, ...AXIS },
+      yAxis: { type: "category", data: a.y_categories ?? [], name: a.y_label, ...AXIS },
+      visualMap: { min: Math.min(0, ...vals), max: Math.max(1, ...vals), calculable: true, orient: "horizontal", left: "center", bottom: 0, textStyle: { color: "#97A3BC" }, inRange: { color: ["#131B2E", "#FF7A2F"] } },
       series: a.series.map((s) => ({ name: s.name, type: "heatmap", data: s.cells ?? [], label: { show: true, color: "#E8ECF6" } })),
     };
   }
   if (a.type === "scatter") {
     return {
       ...base,
-      xAxis: { type: "value", name: a.x_label, scale: true, ...X_NAME, ...AXIS },
-      yAxis: { type: "value", name: a.y_label, scale: true, ...Y_NAME, ...AXIS },
-      series: a.series.map((s) => ({ name: s.name, type: "scatter", symbolSize: 6, data: s.points ?? [] })),
+      xAxis: { type: "value", name: a.x_label, scale: true, ...AXIS },
+      yAxis: { type: "value", name: a.y_label, scale: true, ...AXIS },
+      series: a.series.map((s) => ({ name: s.name, type: "scatter", symbolSize: 8, data: s.points ?? [] })),
     };
   }
   return {
     ...base,
-    xAxis: { type: "category", data: a.categories ?? [], name: a.x_label, ...X_NAME, ...AXIS },
-    yAxis: { type: "value", name: a.y_label, ...Y_NAME, ...AXIS },
+    xAxis: { type: "category", data: a.categories ?? [], name: a.x_label, ...AXIS },
+    yAxis: { type: "value", name: a.y_label, ...AXIS },
     series: a.series.map((s) => ({ name: s.name, type: a.type, data: s.values ?? [], smooth: a.type === "line" })),
   };
 }
 
 let chartSeq = 0;
-
-export const newChartId = () => `chart-${Date.now().toString(36)}-${++chartSeq}`;
 
 export const makeChartTool = defineTool({
   name: "make_chart",
@@ -129,7 +124,7 @@ export const makeChartTool = defineTool({
       const unknown = chartDataNumbers(a).filter((n) => !ctx.isKnownNumber!(n));
       if (unknown.length) return fail(`chart values must come from earlier tool results; not found: ${[...new Set(unknown)].slice(0, 5).join(", ")}`);
     }
-    const chart: ChartPayload = { id: newChartId(), title: a.title, type: a.type, option: buildOption(a), source_note: a.source_note };
+    const chart: ChartPayload = { id: `chart-${Date.now().toString(36)}-${++chartSeq}`, title: a.title, type: a.type, option: buildOption(a), source_note: a.source_note };
     return { ok: true, data: { chart }, sources: [], summary: `chart "${a.title}" drawn` };
   },
 });
