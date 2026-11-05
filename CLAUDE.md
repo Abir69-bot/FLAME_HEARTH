@@ -111,7 +111,7 @@ Calm, precise, a little dry humour. Speaks first when it sees a hazard. Three ex
 ## Commands
 - `npm run dev` (local site at http://localhost:3000) · `npm run build` · `npm run lint` · `npm test`
 - Data prep: `python3 -m venv .venv && . .venv/bin/activate && pip install -r scripts/ingest/requirements.txt && python scripts/ingest/ingest.py`
-- Blueprint: `npm run blueprint` (rebuild once) · `npm run blueprint:watch` (live at http://localhost:4321). `npm run build` rebuilds it automatically.
+- Blueprint: `npm run blueprint` (rebuild once) · `npm run blueprint:watch` (live at http://localhost:4321) · `npm run blueprint:reviewed` (after checking the explanations). `npm run build` rebuilds it automatically.
 - Deploy: push to `main` (auto) or `npx vercel --prod`
 
 ## How Claude Code works here
@@ -123,5 +123,5 @@ Calm, precise, a little dry humour. Speaks first when it sees a hazard. Three ex
 6. Ask before adding big new dependencies or changing the architecture.
 7. When the user must act (log in, approve in a browser), STOP and give short numbered steps, then wait.
 8. Keys: add every key that is set in `.env.local` to Vercel (Production and Preview) by piping the value into `npx vercel env add`, never showing it. When the user adds a new key later, do the same and redeploy.
-9. Blueprint (`public/blueprint.html`, generated; never edit it by hand): when you add or remove a page, API route, VESTA tool, engine, lib module, shell component or dependency, or change how the pipeline works, update `scripts/blueprint/stories.ts` and run `npm run blueprint`. Never type a number into a story: use `{{factName}}` from `scan.ts`. `tests/blueprint.test.ts` fails if it is out of step.
+9. Blueprint (`public/blueprint.html`, generated; never edit it by hand): when you add or remove a page, API route, VESTA tool, engine, lib module, shell component or dependency, or change how the pipeline works, update `scripts/blueprint/stories.ts` and run `npm run blueprint`. Never type a number into a story: use `{{factName}}` from `scan.ts`. This applies until the project is finished. When a file in `scripts/blueprint/pipeline-watch.ts` changes, re-read the matching section of `stories.ts`, correct it if the behaviour changed, then run `npm run blueprint:reviewed`; never run that command without checking. New pipeline files go on the watch list. `tests/blueprint.test.ts` fails if any of this is out of step.
 10. End of every phase: update `PROGRESS.md` (Done · Decisions · Problems · Next), then `git add -A`, `git commit -m "Phase N: <summary>"`, `git push origin main`, and report the Vercel URL.

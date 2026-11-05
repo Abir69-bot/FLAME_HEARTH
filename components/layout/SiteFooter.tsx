@@ -8,6 +8,10 @@ export function SiteFooter() {
         Built by Team Polaris
       </span>
       <span>NASA Space Apps Challenge 2026</span>
+      <a href="/blueprint.html" target="_blank" rel="noopener noreferrer" className="inline-block py-1 underline underline-offset-2 transition hover:text-ember-soft">
+        How HEARTH works
+        <span className="sr-only"> (opens in a new tab)</span>
+      </a>
       <span className="basis-full sm:basis-auto">Data: NASA Physical Sciences Informatics. Independent student project, not endorsed by NASA.</span>
     </footer>
   );

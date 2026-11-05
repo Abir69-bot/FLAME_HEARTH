@@ -34,7 +34,8 @@
   }
   function section(id, inner) {
     var s = S.sections[id];
-    return '<section id="' + id + '" class="sec"><header class="sec-head"><p class="eyebrow">' + esc(s.eyebrow) + "</p><h2>" + esc(s.title) + '</h2><p class="lead">' + T(s.intro) + "</p></header>" + inner + "</section>";
+    var pill = M.needsReview.some(function (r) { return r.section === id; }) ? '<span class="review-pill">' + esc(S.review.pill) + "</span>" : "";
+    return '<section id="' + id + '" class="sec"><header class="sec-head"><p class="eyebrow">' + esc(s.eyebrow) + pill + "</p><h2>" + esc(s.title) + '</h2><p class="lead">' + T(s.intro) + "</p></header>" + inner + "</section>";
   }
   function panelHead(title, story) { return '<div class="panel-head"><h3>' + esc(title) + "</h3>" + (story ? "<p>" + T(story) + "</p>" : "") + "</div>"; }
 
@@ -86,7 +87,10 @@
     var banner = M.unexplained.length
       ? '<div class="banner" role="status"><b>New, not explained yet:</b> ' + M.unexplained.map(function (u) { return "<code>" + esc(u.id) + "</code>"; }).join(" ") + "<span> The scanner found these in the code. Add their stories to <code>scripts/blueprint/stories.ts</code>.</span></div>"
       : "";
-    return '<section id="top" class="hero">' + banner +
+    var review = M.needsReview.length
+      ? '<div class="banner review" role="status"><b>' + esc(S.review.title) + "</b> " + T(S.review.story) + '<ul class="review-list">' + M.needsReview.map(function (r) { return "<li>" + fileLink(r.file) + " <span>" + esc(S.review.reasons[r.reason] || r.reason) + '</span> <a href="#' + esc(r.section) + '">' + esc(S.sections[r.section] ? S.sections[r.section].nav : r.section) + " ↓</a></li>"; }).join("") + "</ul></div>"
+      : "";
+    return '<section id="top" class="hero">' + banner + review +
       '<p class="eyebrow">' + esc(S.hero.eyebrow) + '</p><h1 class="fire">' + esc(S.hero.title) + '</h1><p class="lead big">' + T(S.hero.lead) + "</p>" +
       '<p class="stamp"><span class="live-badge"><i></i>Watching for changes</span><span>Scanned from the code on ' + esc(stamp) + "</span>" + (M.scan.commit ? "<span>at commit <code>" + esc(M.scan.commit) + "</code></span>" : "") + "</p>" +
       '<ul class="stats">' + S.hero.stats.map(function (t) { return '<li><b class="count" data-to="' + esc(F[t.fact]) + '">' + n(F[t.fact]) + "</b><span>" + esc(t.label) + "</span></li>"; }).join("") + "</ul></section>";
@@ -539,6 +543,9 @@
     var U = S.selfUpdate;
     var steps = U.steps.map(function (st, i) { return '<li class="flow-card"><i>' + (i + 1) + "</i><h4>" + esc(st.label) + "</h4><p>" + T(st.story) + "</p></li>"; }).join("");
     var cmds = U.commands.map(function (c) { return "<li><code>" + esc(c.cmd) + "</code><span>" + esc(c.what) + "</span></li>"; }).join("");
+    var watch = Object.keys(S.sections).filter(function (id) { return M.watched.some(function (w) { return w.section === id; }); }).map(function (id) {
+      return '<p class="watch-group"><b>' + esc(S.sections[id].nav) + "</b>" + M.watched.filter(function (w) { return w.section === id; }).map(function (w) { return fileLink(w.file); }).join("") + "</p>";
+    }).join("");
     var changes = M.changes.length
       ? '<ul class="changes">' + M.changes.map(function (c) { return "<li><time>" + esc(c.date) + "</time>" + c.added.map(function (a) { return '<span class="add">+ ' + esc(a) + "</span>"; }).join("") + c.removed.map(function (a) { return '<span class="rem">− ' + esc(a) + "</span>"; }).join("") + "</li>"; }).join("") + "</ul>"
       : '<p class="note">' + esc(S.timeline.noChanges) + "</p>";
@@ -548,7 +555,7 @@
     }
     var head = M.history.slice(0, 10).map(item).join(""), rest = M.history.slice(10).map(item).join("");
     return section("growth",
-      '<div class="panel">' + panelHead(U.title) + '<ol class="flow">' + steps + '</ol><ul class="cmds">' + cmds + '</ul><p class="guard">' + T(U.guard) + "</p></div>" +
+      '<div class="panel">' + panelHead(U.title) + '<ol class="flow">' + steps + '</ol><ul class="cmds">' + cmds + '</ul><p class="guard">' + T(U.guard) + '</p><details class="more"><summary>' + esc(U.watchList) + "</summary>" + watch + "</details></div>" +
       '<div class="panel">' + panelHead(S.timeline.changes) + changes + "</div>" +
       '<div class="panel">' + panelHead(S.timeline.title) + '<ol class="timeline">' + head + "</ol>" + (rest ? '<details class="more"><summary>Show ' + (M.history.length - 10) + ' earlier changes</summary><ol class="timeline">' + rest + "</ol></details>" : "") + "</div>");
   }

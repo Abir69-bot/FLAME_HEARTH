@@ -120,8 +120,8 @@ export const STORIES = {
       eyebrow: "The living part",
       title: "This page keeps itself up to date",
       intro: {
-        s: "You don't maintain this page by hand. A scanner re-reads the project on every build, so new pages, tools and numbers appear here by themselves.",
-        e: "`scripts/blueprint/scan.ts` imports the real modules and produces a manifest, which `render.ts` embeds into one self-contained HTML file. It runs as an npm `prebuild` step and can never fail a deploy.",
+        s: "Nobody has to remember to update this page. A scanner re-reads the project on every build, so new pages, tools and numbers appear here by themselves, and anything it can't explain gets flagged.",
+        e: "`scripts/blueprint/scan.ts` imports the real modules and produces a manifest, which `render.ts` embeds into one self-contained HTML file. It runs as an npm `prebuild` step and can never fail a deploy. `pipeline-watch.ts` fingerprints the key files so that a logic change flags its explanation for review.",
       } as Story,
     },
   },
@@ -323,7 +323,7 @@ export const STORIES = {
   shell: {
     "components/layout/TopBar.tsx": { title: "Top bar & mission chips", story: same("The mission you pick here steers every page and VESTA at once. Shared state lives in one small store.") },
     "components/layout/SideNav.tsx": { title: "Side navigation", story: same("The list of pages. On small screens it moves to a sliding row at the top.") },
-    "components/layout/SiteFooter.tsx": { title: "Footer", story: same("Credits and links at the bottom of every page.") },
+    "components/layout/SiteFooter.tsx": { title: "Footer", story: same("Credits at the bottom of every page, plus the link that opens this Blueprint.") },
     "components/vesta/VestaPanel.tsx": { title: "VESTA panel", story: same("The chat on every page, with the engine menu and level picker. It moves below the page on small screens.") },
     "components/ui/TestDrawer.tsx": { title: "Test details drawer", story: same("Opens one test with its derived values, source row and related PDF passages. VESTA can open it too.") },
     "components/ui/Tour.tsx": { title: "First-visit tour", story: same("A short guided tour for newcomers. Skip it once and it stays away.") },
@@ -523,18 +523,27 @@ export const STORIES = {
     steps: [
       { label: "Scan", story: same("Reads routes, pages, tools, engines, tests and data counts straight from the code.") },
       { label: "Run", story: same("Runs the real Offline engine, router and grounding check, and records what they do.") },
-      { label: "Compare", story: same("Spots anything new or removed since the last scan and adds it to the log below.") },
+      { label: "Compare", story: same("Logs anything new or removed since the last scan, and checks whether a key pipeline file changed since its explanation was last reviewed.") },
       { label: "Publish", story: same("Writes one self-contained file: public/blueprint.html.") },
     ],
     commands: [
       { cmd: "npm run blueprint:watch", what: "Live view at localhost: it refreshes itself whenever a file changes." },
       { cmd: "npm run blueprint", what: "Rebuild the page once." },
       { cmd: "npm run build", what: "Rebuilds it automatically, and so does every Vercel deploy." },
+      { cmd: "npm run blueprint:reviewed", what: "After a pipeline change: run this once you've checked that the explanation is still right." },
     ],
     guard: {
-      s: "What a scanner can't do is explain something new in plain words. So anything without an explanation is marked “new, not explained yet”, and a test fails until someone writes it.",
-      e: "`tests/blueprint.test.ts` fails on unexplained items, stale output, unresolved placeholders, numbers typed into prose and any key-like string. Vercel doesn't run tests, so this can never block a deploy.",
+      s: "A scanner can't explain something new in plain words, or tell what a code change means. So anything without an explanation is marked “new, not explained yet”, a changed pipeline file is marked “explanation under review”, and a test fails until someone has checked.",
+      e: "`tests/blueprint.test.ts` fails on unexplained items, pipeline files changed since review, stale output, unresolved placeholders, numbers typed into prose and any key-like string. Vercel doesn't run tests, so this can never block a deploy; flagged items simply show on the page.",
     } as Story,
+    watchList: "The {{watchedFiles}} pipeline files under watch",
+  },
+
+  review: {
+    title: "Explanation under review.",
+    story: same("This code changed after its explanation was last checked. Numbers on this page still come straight from the code, but the written explanation may be behind."),
+    pill: "Explanation under review",
+    reasons: { changed: "changed", removed: "removed", new: "not reviewed yet" } as Record<string, string>,
   },
 
   timeline: { title: "The project's story so far", changes: "Spotted by the scanner", noChanges: "No structural changes recorded yet. New pages, routes and tools will show up here." },

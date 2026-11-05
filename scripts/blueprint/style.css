@@ -64,6 +64,14 @@ main { max-width: 1240px; margin: 0 auto; padding: 0 20px; }
 .banner code { margin: 0 4px; }
 .banner span { display: block; margin-top: 4px; color: var(--muted); }
 
+.banner.review { border-color: var(--ember); background: rgba(255, 122, 47, .1); }
+.review-list { display: grid; gap: 5px; margin-top: 8px; }
+.review-list li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 8px; font-size: 13.5px; }
+.review-list span { display: inline; margin: 0; }
+.review-pill { display: inline-block; margin-left: 10px; padding: 1px 8px; border: 1px solid var(--warn); border-radius: 999px; color: var(--warn); font-size: 11px; letter-spacing: .04em; text-transform: none; }
+.watch-group { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin-top: 8px; }
+.watch-group b { width: 100%; font: 600 14px var(--head); }
+
 /* sections + panels */
 .sec { padding: 54px 0 8px; }
 .sec-head { margin-bottom: 20px; }

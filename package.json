@@ -11,7 +11,8 @@
     "test": "vitest run",
     "evals": "tsx scripts/run-evals.ts",
     "blueprint": "tsx scripts/blueprint/build.ts",
-    "blueprint:watch": "tsx scripts/blueprint/watch.ts"
+    "blueprint:watch": "tsx scripts/blueprint/watch.ts",
+    "blueprint:reviewed": "tsx scripts/blueprint/reviewed.ts && tsx scripts/blueprint/build.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.4.0",

@@ -4,6 +4,7 @@ import vm from "node:vm";
 import { beforeAll, describe, expect, it } from "vitest";
 import { allTests, isCountable } from "@/lib/data";
 import { envelopeCheck, ENVELOPE_O2_WINDOW_PCT, ENVELOPE_P_WINDOW_PSI, ENVELOPE_SUPPORTED_MIN, ISS_PO2_PSI, pO2, ratioToISS } from "@/lib/physics";
+import { currentFingerprints, fingerprint, pipelineStatus, readReviewed, WATCHED } from "../scripts/blueprint/pipeline-watch";
 import { assemble, audit, normalise, OUTPUT, readManifest, renderHtml, type Manifest } from "../scripts/blueprint/render";
 import { scanProject, type Scan } from "../scripts/blueprint/scan";
 import { STORIES } from "../scripts/blueprint/stories";
@@ -46,6 +47,42 @@ describe("Blueprint stays in step with the project", () => {
     for (const r of STORIES.rules) [...r.code, ...r.test].forEach((f) => paths.add(f));
     const missing = [...paths].filter((p) => !fs.existsSync(path.join(ROOT, p)));
     expect(missing).toEqual([]);
+  });
+});
+
+describe("Pipeline watch", () => {
+  it("no pipeline file changed since its explanation was reviewed", () => {
+    const pending = pipelineStatus(currentFingerprints(), readReviewed());
+    expect(
+      pending.map((p) => `${p.file} (${p.reason})`),
+      "Re-read these sections of scripts/blueprint/stories.ts, update them if needed, then run: npm run blueprint:reviewed",
+    ).toEqual([]);
+  });
+
+  it("watches files and sections that really exist", () => {
+    for (const w of WATCHED) {
+      expect(fs.existsSync(path.join(ROOT, w.file)), w.file).toBe(true);
+      expect(Object.keys(STORIES.sections), w.file).toContain(w.section);
+    }
+  });
+
+  it("spots changed, removed and never-reviewed files", () => {
+    const [a, b, c] = WATCHED.map((w) => w.file);
+    const current = currentFingerprints();
+    const reviewed = { ...current, [a]: "something-else" };
+    delete reviewed[b];
+    const stillThere = { ...current };
+    delete stillThere[c];
+    const found = pipelineStatus(stillThere, reviewed);
+    expect(found.find((x) => x.file === a)?.reason).toBe("changed");
+    expect(found.find((x) => x.file === b)?.reason).toBe("new");
+    expect(found.find((x) => x.file === c)?.reason).toBe("removed");
+    expect(found.length).toBe(3);
+  });
+
+  it("ignores line endings, so Windows and the build server agree", () => {
+    expect(fingerprint("a\r\nb\r\n")).toBe(fingerprint("a\nb\n"));
+    expect(fingerprint("a\nb\n")).not.toBe(fingerprint("a\nc\n"));
   });
 });
 

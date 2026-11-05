@@ -7,6 +7,16 @@
 
 ## Log
 
+### Blueprint link and pipeline watch (at the user's request)
+**Done**
+- Small "How HEARTH works" link in the site footer, on every page. It opens `/blueprint.html` in a new tab and is not in the side menu.
+- `scripts/blueprint/pipeline-watch.ts` fingerprints the key pipeline files. If one changes, the Blueprint shows "explanation under review" and `tests/blueprint.test.ts` fails until someone checks the text and runs `npm run blueprint:reviewed`.
+
+**Decisions**
+- The user wants the Blueprint kept up to date for as long as the project is being built. Standing rule in `CLAUDE.md`.
+- Fingerprints ignore line endings, so Windows and Vercel agree. Any edit to a watched file flags it, comments included: simple and hard to miss, at the cost of an occasional quick review.
+- Flags never block a deploy, because Vercel does not run tests. A flagged item can show on the live page until reviewed.
+
 ### HEARTH Blueprint (added at the user's request, during Phase 6)
 **Done**
 - One self-contained animated page, `public/blueprint.html` (served at `/blueprint.html`, also opens by double-click). It explains the whole system: raw NASA files, cleaning, the split, the JSON "database", every page's data trail, VESTA, the honesty rules, deployment and project history, with Simple and Engineer views. No new dependencies.

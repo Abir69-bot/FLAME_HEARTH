@@ -20,6 +20,7 @@ import { MISSIONS } from "@/lib/missions";
 import { ENVELOPE_O2_WINDOW_PCT, ENVELOPE_P_WINDOW_PSI, ENVELOPE_SUPPORTED_MIN, FLOW_LOW_MAX, FLOW_STILL_MAX, ISS_PO2_PSI, pO2, ratioToISS } from "@/lib/physics";
 import { vestaLimiter } from "@/lib/ratelimit";
 import { INVESTIGATIONS } from "@/lib/types";
+import { currentFingerprints, pipelineStatus, readReviewed, WATCHED } from "./pipeline-watch";
 import { RAW_CLEAN } from "./stories";
 
 /** An empty environment: the scan must never see a key or a configured model name. */
@@ -501,6 +502,7 @@ export async function scanProject() {
     rankEnv: RANK_WEIGHTS.envelope_tests,
     fallbackRuns: 3 ** AI_IDS.length,
     missionCount: MISSIONS.length,
+    watchedFiles: WATCHED.length,
   };
 
   return {
@@ -524,6 +526,8 @@ export async function scanProject() {
     tests: testFiles,
     deps: Object.entries(pkg.dependencies).map(([name, version]) => ({ name, version: version.replace(/^[\^~]/, "") })),
     pythonDeps: pyReq,
+    watched: WATCHED,
+    needsReview: pipelineStatus(currentFingerprints(ROOT), readReviewed(ROOT)),
     replays: await recordReplays(),
     fallback: await recordFallback(),
     grounding: await recordGrounding(),
