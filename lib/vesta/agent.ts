@@ -6,7 +6,7 @@ import { PROVIDER_TIMEOUT_MS } from "./providers/anthropic";
 import { EngineError, type HistoryMessage, type Provider, type ProviderReply, type ToolResultMessage } from "./providers/types";
 import { runTool, VESTA_TOOLS } from "./tools";
 import type { ChartPayload } from "./tools/make_chart";
-import { toolSpecs } from "./tools/schemas";
+import { compactToolSpecs, toolSpecs } from "./tools/schemas";
 import type { UiEvent } from "./tools/ui_action";
 
 export const MAX_TOOL_ROUNDS = 6;
@@ -56,11 +56,20 @@ export async function withTimeout<T>(fn: (signal: AbortSignal) => Promise<T>, ms
   }
 }
 
-function truncate(s: string): string {
-  return s.length <= TOOL_RESULT_MAX_CHARS ? s : `${s.slice(0, TOOL_RESULT_MAX_CHARS)} …[truncated]`;
+function truncate(s: string, max: number): string {
+  return s.length <= max ? s : `${s.slice(0, max)} …[truncated]`;
+}
+
+/** The model gets the statistics behind a chart_data chart, not every plotted point: the browser gets those. */
+function forModel(name: string, data: unknown): unknown {
+  if (name !== "chart_data" || !data || typeof data !== "object") return data;
+  const { chart, ...rest } = data as { chart?: ChartPayload | null };
+  return { ...rest, chart: chart ? { id: chart.id, title: chart.title, drawn: true } : null };
 }
 
 const EVIDENCE_TOOLS = new Set(["envelope_check", "nearest_tests"]);
+/** Tools a model may try several ways. One empty attempt says nothing about the answer built from the attempts that worked. */
+const EXPLORING_TOOLS = new Set(["analyze_data", "chart_data", "read_doc_page"]);
 
 /** These tools always move the dashboard, in every engine, even if the model forgets ui_action. */
 export const AUTO_VIEW: Record<string, UiEvent> = {
@@ -81,11 +90,13 @@ export function withAutoView(ui: UiEvent[], toolsUsed: string[], compareArgs?: s
 export async function runAgent(input: AgentInput): Promise<AgentOutput> {
   const { provider, history, emit } = input;
   const timeout = input.timeoutMs ?? PROVIDER_TIMEOUT_MS;
+  const maxRounds = provider.limits?.maxToolRounds ?? MAX_TOOL_ROUNDS;
+  const resultMax = provider.limits?.toolResultMaxChars ?? TOOL_RESULT_MAX_CHARS;
   const known = new Set<number>();
   for (const m of history) if (m.role === "user") collectNumbers(m.content, known);
 
   const ctx = { missionId: input.missionId, isKnownNumber: (n: number) => matches(n, 6, known) };
-  const session = provider.startSession({ system: systemPrompt(input.missionId, input.level), history, tools: toolSpecs(VESTA_TOOLS) });
+  const session = provider.startSession({ system: systemPrompt(input.missionId, input.level), history, tools: provider.compactTools ? compactToolSpecs(VESTA_TOOLS) : toolSpecs(VESTA_TOOLS) });
 
   const sources: Source[] = [];
   const charts: ChartPayload[] = [];
@@ -93,6 +104,7 @@ export async function runAgent(input: AgentInput): Promise<AgentOutput> {
   const toolsUsed: string[] = [];
   const evidence: Confidence[] = [];
   const otherConf: Confidence[] = [];
+  let emptyAttempt = false;
   let rounds = 0;
   let invalid = 0;
   let askedFix = false;
@@ -100,14 +112,14 @@ export async function runAgent(input: AgentInput): Promise<AgentOutput> {
   let compareArgs: string[] | undefined;
 
   for (;;) {
-    if (++calls > MAX_TOOL_ROUNDS + 3) throw new EngineError("other", "too many model calls");
+    if (++calls > maxRounds + 3) throw new EngineError("other", "too many model calls");
     const reply: ProviderReply = await withTimeout((s) => session.send(s), timeout, input.signal);
 
     if (reply.toolCalls.length) {
       rounds++;
       const results: ToolResultMessage[] = [];
       for (const call of reply.toolCalls) {
-        if (rounds > MAX_TOOL_ROUNDS) {
+        if (rounds > maxRounds) {
           results.push({ id: call.id, name: call.name, isError: true, content: "Tool limit reached. Answer now with the results you already have." });
           continue;
         }
@@ -117,15 +129,16 @@ export async function runAgent(input: AgentInput): Promise<AgentOutput> {
           if (++invalid >= MAX_INVALID_CALLS) throw new EngineError("bad_tool_output");
         }
         emit({ type: "step", tool: call.name, status: res.ok ? "done" : "error", summary: res.summary });
-        const payload = truncate(JSON.stringify({ ok: res.ok, data: res.data, sources: res.sources, confidence: res.confidence, error: res.error }));
+        const payload = truncate(JSON.stringify({ ok: res.ok, data: forModel(call.name, res.data), sources: res.sources, confidence: res.confidence, error: res.error }), resultMax);
         if (res.ok) {
           toolsUsed.push(call.name);
           if (call.name === "compare") compareArgs = (call.args as { investigations?: string[] })?.investigations;
           collectNumbers(payload, known);
           sources.push(...res.sources);
-          if (res.confidence) (EVIDENCE_TOOLS.has(call.name) ? evidence : otherConf).push(res.confidence);
+          if (res.confidence === "no_data" && EXPLORING_TOOLS.has(call.name)) emptyAttempt = true;
+          else if (res.confidence) (EVIDENCE_TOOLS.has(call.name) ? evidence : otherConf).push(res.confidence);
           const d = res.data as { chart?: ChartPayload; ui?: UiEvent } | null;
-          if (call.name === "make_chart" && d?.chart) charts.push(d.chart);
+          if ((call.name === "make_chart" || call.name === "chart_data") && d?.chart) charts.push(d.chart);
           if (call.name === "ui_action" && d?.ui) ui.push(d.ui);
         }
         results.push({ id: call.id, name: call.name, isError: !res.ok, content: payload });
@@ -147,7 +160,9 @@ export async function runAgent(input: AgentInput): Promise<AgentOutput> {
       ? evidence.reduce(lowerConfidence)
       : otherConf.length
         ? otherConf.reduce(lowerConfidence)
-        : "extrapolated";
+        : emptyAttempt
+          ? "no_data"
+          : "extrapolated";
     let confidence = tag ? lowerConfidence(tag, fromTools) : fromTools;
     let finalText = text;
     let note: string | undefined;

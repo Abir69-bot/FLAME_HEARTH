@@ -148,3 +148,13 @@ rather than to a specific record. The files were not compared with PSI's current
   and excluded from counts, envelope checks, ranking, gaps and the map (CFI 8 rows, SPICE 34 rows).
 - **Q4 (ACME campaigns):** the ACME table is only CFI-G. BRE and E-FIELD Flames appear in the PDFs only as
   text (searchable in docs), not as table rows.
+
+## Columns VESTA can analyse (`lib/fields.ts`)
+`analyze_data` and `chart_data` read the clean table plus the investigation-specific columns kept in `extra`. Decisions:
+- `hot_ignition` has three values, all from the raw table: yes, no and flash. Flash is a brief flame that did not last (raw comments such as "A flash and gone"). It is never merged into yes or no.
+- `burn_time_s` is 0 or missing for tests that did not ignite, and for "flow terminated" tests it records when the flow was stopped, not when the flame would have gone out. Tools warn about the first; answers should mention the second.
+- `flow_cm_s` returns nothing for rows flagged `range_check_failed:flow` (negative airflow).
+- `po2_psi` is derived with the tested formula in `lib/physics.ts`.
+- SPICE O2 and pressure are one documented condition (`conditions_from_doc`), so correlating them gives "not computable", not a number.
+- `flow_value_a_unlabelled` and `flow_value_b_unlabelled` stay out: their meaning is unknown. `xo2_before`, `xo2_after`, `pressure_bar` and `pressure_atm` stay out because `o2_pct` and `pressure_psi` already carry them in clean units.
+- Duplicate rows are excluded, like everywhere else.

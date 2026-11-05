@@ -3,6 +3,33 @@
 # facts: strings or numbers that must appear in the answer (numbers allow rounding).
 # offline: true when Offline mode is expected to answer this question fully.
 questions:
+  - id: q30-correlation
+    mission: lunar-rover
+    question: "Is flame temperature correlated with O2 in the ACME tests?"
+    expected_tools: [analyze_data]
+    facts: [0.578]
+    confidence: supported
+    offline: true
+
+  - id: q31-percent-difference
+    mission: lunar-rover
+    question: "What is the percent difference between the rover pO2 and the ISS pO2?"
+    expected_tools: [physics_calc, math_eval]
+    facts: [2.788, 3.087]
+
+  - id: q32-no-prediction-outside-range
+    mission: spacesuit
+    question: "Fit flame temperature against O2 across ACME and predict it at 100% O2."
+    expected_tools: [analyze_data]
+    facts: []
+
+  - id: q33-ignition-by-oxygen
+    mission: lunar-rover
+    question: "Show the ignition rate by O2 level in 10% bands for ACME."
+    expected_tools: [analyze_data, chart_data]
+    facts: []
+    confidence: supported
+
   - id: q01-po2-rover
     mission: lunar-rover
     question: "What is pO2 at 34% O2 and 8.2 psi?"

@@ -54,8 +54,8 @@ O2 partial pressure: pO2 = (O2% / 100) × P. ISS reference = 3.087 psi.
 ## Folder layout (target)
 - `app/` pages: `/` overview, `/explorer`, `/compare`, `/safety`, `/lab`, `/simulator`, `/about`; `app/api/*` route handlers
 - `components/` layout/, charts/, vesta/, ui/, fx/ (decorative canvas effects, never data), map3d/ (3D map scene; its scales are in `lib/map3d.ts`)
-- `lib/data.ts` (load + query processed data), `lib/physics.ts`, `lib/flame.ts`, `lib/missions.ts`, `lib/safety.ts`, `lib/search.ts`, `lib/types.ts`, `lib/store.ts`
-- `lib/vesta/` `agent.ts` (tool loop, provider-agnostic), `router.ts` (engine chain + fallback), `offline.ts` (Offline mode), `providers/` (`anthropic.ts`, `openai-compat.ts` (shared helper), `openrouter.ts`, `groq.ts`, `gemini.ts`, one shared interface), `system-prompt.md`, `tools/` (one file per tool), `grounding.ts`
+- `lib/data.ts` (load + query processed data), `lib/physics.ts`, `lib/stats.ts`, `lib/mathexpr.ts`, `lib/fields.ts`, `lib/flame.ts`, `lib/missions.ts`, `lib/safety.ts`, `lib/search.ts`, `lib/types.ts`, `lib/store.ts`
+- `lib/vesta/` `agent.ts` (tool loop, provider-agnostic), `router.ts` (engine chain + fallback), `offline.ts` (Offline mode), `claude-code-cli.ts` (find + lock down the local CLI), `providers/` (`anthropic.ts`, `openai-compat.ts` (shared helper), `openrouter.ts`, `groq.ts`, `gemini.ts`, `claude-code.ts`, one shared interface), `system-prompt.md`, `tools/` (one file per tool), `grounding.ts`
 - `scripts/blueprint/` the live system map: `scan.ts` reads the project, `stories.ts` holds the plain-language text, `render.ts` + `build.ts` write `public/blueprint.html`
 - `scripts/ingest/` Python data prep · `data/processed/` clean data · `docs/` notes · `evals/` VESTA test questions · `tests/` vitest
 
@@ -75,6 +75,10 @@ Unknown value → `null`. Units converted on ingest; original units recorded in 
 - `safety_audit` findings (prevention / detection / suppression) with evidence + confidence
 - `gap_finder` untested O2 × pressure cells and missing fuel types
 - `make_chart` validated ECharts option (line, bar, scatter, radar, heatmap only)
+- `chart_data` draws a chart directly from all matching tests (scatter with fit, histogram, bar, line, heatmap); missing combinations stay empty, never zero
+- `analyze_data` statistics across all matching tests (describe, percentiles, correlation, regression, histogram, group_stats, crosstab, compare_groups, rows), formulas in `lib/stats.ts`, columns in `lib/fields.ts`; `predict_at` is refused outside the tested range
+- `math_eval` calculator (`lib/mathexpr.ts`, never JS eval); refuses numbers that did not come from a tool result or the user
+- `read_doc_page` one whole PDF page with its tables
 - `ui_action` tell the dashboard to go to a view, set mission, highlight tests, open a test
 Tool schemas are written once in zod and converted for each provider. SSE events from `/api/vesta`: `engine` (which engine is answering), `step`, `text`, `chart`, `ui`, `sources`, `confidence`, `done`, `error`.
 
@@ -86,14 +90,16 @@ Tool schemas are written once in zod and converted for each provider. SSE events
 | 3. Groq (free) | `GROQ_API_KEY` is set | Default `GROQ_MODEL=openai/gpt-oss-120b` |
 | 4. Gemini (free) | `GEMINI_API_KEY` is set | Default `GEMINI_MODEL=gemini-2.5-flash` |
 | 5. Offline | always available | Rule-based, no AI, never fails |
+| Claude Code (outside the chain) | Local only: `claude` CLI found, not on Vercel, request addressed to localhost | Picked by hand, never in Auto. Runs on the owner's Claude plan. Default `VESTA_CLAUDE_CODE_MODEL=opus`, optional `VESTA_CLAUDE_CODE_EFFORT`. Falls back down the chain on failure |
 - Auto mode (default): try the engines in order 1 → 2 → 3 → 4 → 5 and use the first one that works. Move to the next on: missing key, 401/403, 429 (rate or free limit), 5xx, timeout (20 s), a model that cannot do tool calling, or invalid tool-call output. Never show raw provider errors to users.
-- Every engine uses the same system prompt, the same tools and the same grounding check, and must emit the same SSE events.
+- Every engine uses the same system prompt, the same tools and the same grounding check, and must emit the same SSE events. One exception to "the same tools": Groq's free tier allows few tokens per minute, so it gets `compactToolSpecs` (no parameter descriptions, without `make_chart` and `read_doc_page`).
+- Claude Code is locked down (`lib/vesta/providers/claude-code.ts`): `--tools ""`, `--strict-mcp-config`, `--setting-sources ""`, an empty temp folder as working directory, an allow-listed environment (no AI keys, or the CLI would bill the API key) and no shell. Its only reach is the VESTA tools through the agent loop. Never add file, shell or web tools to it: question text is untrusted. Being local, it may exceed the hosted limits below (`CLAUDE_CODE_LIMITS`).
 - Offline mode (`lib/vesta/offline.ts`): a deterministic router detects the intent (assess conditions, compare, gaps, rank, safety audit, explain a test or a topic, help), pulls numbers like "34%" or "8.2 psi" from the message, calls the same tools and builds a templated answer with sources and a confidence tag. Unknown questions get a short list of what it can do.
 - `GET /api/vesta/engines` returns only `{id, label, available}` for each engine (never keys or key fragments). The frontend uses it for the model menu.
 - Cost and limits: max 6 tool rounds, short answers, cache identical questions for 10 minutes, one request at a time per visitor.
 
 ## VESTA model menu (in the VESTA panel header)
-- Dropdown with: Auto (recommended) · Claude · OpenRouter · Groq · Gemini · Offline. Engines without a key are shown greyed out with "no key" and cannot be picked.
+- Dropdown with: Auto (recommended) · Claude Code · Claude · OpenRouter · Groq · Gemini · Offline. Engines without a key are shown greyed out with "no key" and cannot be picked; Claude Code shows "local only" when its CLI is not there.
 - The choice is saved in the zustand store and in localStorage, and sent with every message.
 - If the picked engine fails, VESTA falls back down the chain and shows a small note in that message, e.g. "Groq limit reached, answered with Gemini".
 - Every VESTA message shows a small badge with the engine that answered (e.g. "via Groq · gpt-oss-120b", "Offline mode").

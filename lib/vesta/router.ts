@@ -1,4 +1,4 @@
-import { runAgent, type AgentOutput } from "./agent";
+import { runAgent, withTimeout, type AgentOutput } from "./agent";
 import { badge, ENGINE_LABELS, engineChain, engineModel, type EngineChoice, type EngineId } from "./engines";
 import { chunkText, type Emit, type VestaEvent } from "./events";
 import { runOffline } from "./offline";
@@ -38,6 +38,8 @@ export interface RouterDeps {
   now?: () => number;
   /** Eval runs only: use exactly the chosen engine (no fallback, no cooldown skip). */
   strict?: boolean;
+  /** The visitor left or pressed stop: stop working and stop spending. */
+  signal?: AbortSignal;
 }
 
 const cache = new Map<string, { at: number; events: VestaEvent[] }>();
@@ -83,11 +85,12 @@ export async function runVesta(req: VestaRequest, emit: Emit, deps: RouterDeps =
   const lastUser = [...req.messages].reverse().find((m) => m.role === "user")?.content ?? "";
 
   const now = deps.now ?? Date.now;
-  const started = now();
+  let started = now();
   const deadline = deps.deadlineMs ?? AI_DEADLINE_MS;
 
   const chain: EngineId[] = deps.strict && req.engine !== "auto" ? [req.engine] : engineChain(req.engine);
   for (const id of chain) {
+    if (deps.signal?.aborted) return;
     const model = id === "offline" ? "rule-based" : (getProvider(id, deps)?.model ?? engineModel(id, deps.env ?? process.env));
     let result: AgentOutput;
     if (id !== "offline") {
@@ -112,12 +115,24 @@ export async function runVesta(req: VestaRequest, emit: Emit, deps: RouterDeps =
           continue;
         }
         out(engineEvent(id, provider.model, failures));
-        const left = Math.max(2_000, deadline - (now() - started));
-        result = await runAgent({ provider, history: req.messages, missionId: req.missionId, level: req.level, emit: out, timeoutMs: Math.min(deps.timeoutMs ?? 20_000, left) });
+        const limits = provider.limits;
+        if (limits) {
+          result = await withTimeout(
+            (signal) => runAgent({ provider, history: req.messages, missionId: req.missionId, level: req.level, emit: out, timeoutMs: limits.callTimeoutMs, signal }),
+            limits.deadlineMs,
+            deps.signal,
+          );
+        } else {
+          const left = Math.max(2_000, deadline - (now() - started));
+          result = await runAgent({ provider, history: req.messages, missionId: req.missionId, level: req.level, emit: out, timeoutMs: Math.min(deps.timeoutMs ?? 20_000, left), signal: deps.signal });
+        }
       }
     } catch (e) {
+      if (deps.signal?.aborted) return;
       const err = classifyError(e);
       log(`[vesta] engine ${id} failed: ${err.kind}`);
+      // An engine with its own long budget must not use up the next engines' time.
+      if (id !== "offline" && getProvider(id, deps)?.limits) started = now();
       failures.push({ id, reason: FRIENDLY_REASON[err.kind] });
       const cdMs = COOLDOWN_MS[err.kind];
       if (cdMs && id !== "offline") cooldown.set(id, { until: now() + cdMs, reason: FRIENDLY_REASON[err.kind] });

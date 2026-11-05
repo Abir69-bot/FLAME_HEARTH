@@ -31,7 +31,8 @@ const NOT_QUANTITIES: RegExp[] = [
   /\b[A-Z]{2,}(?:-[A-Z0-9]+)+\b/g, // ACME-CFIG-128, CFI-FLEX-1206, SPICE-001, CFI-G
   /\b(?:[A-Z][a-z]?\d+)+\b/g, // O2, N2, C12H26, CO2
   /\bp(?:ages?)?\.?\s?\d+(?:\s?[–-]\s?\d+)?\b/gi, // p20, page 3, pp 6–9
-  /\brows?\s\d+(?:\s?[–-]\s?\d+)?/gi, // row 129, rows 2–334
+  // row 129, rows 2–334, rows 2–68, 70–76, 78–334. A later item followed by a unit or % is a quantity, not a row.
+  /\brows?\s\d+(?:\s?[–-]\s?\d+)?(?:,\s?\d+(?:\s?[–-]\s?\d+)?(?!\s*[%a-zA-Z°]|\.?\d))*/gi,
   /\b\d{1,2}:\d{2}(?::\d{2})?\b/g, // times
   /\b(?:19|20)\d{2}-\d{2}-\d{2}\b/g, // dates
   /\b[a-z]+-[a-z0-9.-]*\d[a-z0-9.-]*\b/gi, // model names like gpt-oss-120b, gemini-2.5-flash

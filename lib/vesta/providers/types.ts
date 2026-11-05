@@ -38,9 +38,20 @@ export interface HistoryMessage {
   content: string;
 }
 
+/** Set only by an engine that is not bound by the hosted limits (a 60 s function, free-tier tokens). */
+export interface EngineLimits {
+  callTimeoutMs: number;
+  deadlineMs: number;
+  maxToolRounds: number;
+  toolResultMaxChars: number;
+}
+
 export interface Provider {
-  id: "claude" | "openrouter" | "groq" | "gemini";
+  id: "claude" | "openrouter" | "groq" | "gemini" | "claude-code";
   model: string;
+  limits?: EngineLimits;
+  /** Send tool schemas without parameter descriptions, for a free tier that counts every token. */
+  compactTools?: boolean;
   startSession(input: { system: string; history: HistoryMessage[]; tools: ToolSpec[] }): ChatSession;
 }
 

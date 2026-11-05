@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { apiError } from "@/lib/api";
+import { isLocalHost } from "@/lib/vesta/claude-code-cli";
 import { sse, type VestaEvent } from "@/lib/vesta/events";
 import { runVesta } from "@/lib/vesta/router";
 import { vestaLimiter } from "@/lib/ratelimit";
@@ -18,7 +19,7 @@ const Body = z.object({
     .max(MAX_MESSAGES),
   mission: z.string().max(40).optional(),
   level: z.enum(["student", "researcher", "engineer"]).default("researcher"),
-  engine: z.enum(["auto", "claude", "openrouter", "groq", "gemini", "offline"]).default("auto"),
+  engine: z.enum(["auto", "claude-code", "claude", "openrouter", "groq", "gemini", "offline"]).default("auto"),
 });
 
 /** One request at a time per visitor (per server instance). */
@@ -50,6 +51,9 @@ export async function POST(req: Request) {
   const wait = evalMode ? 0 : vestaLimiter.check(visitor);
   if (wait) return apiError(`You've asked VESTA a lot of questions in a short time. Please wait about ${wait} seconds and try again.`, 429);
   busy.add(visitor);
+  // Claude Code runs on the owner's personal plan, so only a browser on this same machine may pick it.
+  const engine = parsed.data.engine === "claude-code" && !isLocalHost(req.headers.get("host")) ? "auto" : parsed.data.engine;
+  const stop = new AbortController();
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -63,9 +67,9 @@ export async function POST(req: Request) {
       };
       try {
         await runVesta(
-          { messages: parsed.data.messages, missionId: parsed.data.mission, level: parsed.data.level, engine: parsed.data.engine },
+          { messages: parsed.data.messages, missionId: parsed.data.mission, level: parsed.data.level, engine },
           send,
-          { useCache: !evalMode, strict: evalMode },
+          { useCache: !evalMode, strict: evalMode, signal: stop.signal },
         );
       } catch {
         send({ type: "error", message: "VESTA could not answer right now. Please try again." });
@@ -76,6 +80,7 @@ export async function POST(req: Request) {
       }
     },
     cancel() {
+      stop.abort();
       busy.delete(visitor);
     },
   });

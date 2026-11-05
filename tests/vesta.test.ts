@@ -305,7 +305,7 @@ describe("engines endpoint", () => {
     expect(body).not.toContain("gsk_");
     expect(body).not.toContain("sk-or-");
     const list = JSON.parse(body) as Record<string, unknown>[];
-    expect(list.map((e) => Object.keys(e).sort().join(","))).toEqual(Array(6).fill("available,id,label"));
+    expect(list.map((e) => Object.keys(e).sort().join(","))).toEqual(Array(7).fill("available,id,label"));
     expect(list.find((e) => e.id === "claude")?.available).toBe(true);
     expect(list.find((e) => e.id === "openrouter")?.available).toBe(true);
     expect(list.find((e) => e.id === "gemini")?.available).toBe(false);
