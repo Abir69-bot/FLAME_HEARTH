@@ -2,7 +2,7 @@
 
 **Fire-safety intelligence for crewed habitats** — NASA Space Apps Challenge 2026.
 
-**Repository: https://github.com/Abir69-bot/FLAME_HEARTH** · earlier live version: https://project-hearth-five.vercel.app (does not include the Insights, Mission report, PDF links and search added in this repository until it is redeployed from here).
+**Live site: https://flame-hearth.vercel.app** · Repository: https://github.com/Abir69-bot/FLAME_HEARTH
 
 HEARTH (Habitat Environment Analysis & Risk Tracking Hub) summarises, ranks and interprets NASA microgravity combustion experiments to give fire-safety insights for crewed habitats: the ISS, a lunar base, pressurized rovers and spacesuits. It is guided by **VESTA** (Virtual Engineer for Space-fire Threat Assessment), an AI crewmate built as a tool-using agent: its tool results change what the dashboard shows.
 

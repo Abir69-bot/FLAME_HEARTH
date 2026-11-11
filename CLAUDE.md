@@ -10,7 +10,7 @@ It is guided by VESTA (Virtual Engineer for Space-fire Threat Assessment), an AI
 
 ## Where things live
 - GitHub repo: https://github.com/Abir69-bot/FLAME_HEARTH (branch `main`), pushed from the owner's account `Abir69-bot`. History before it comes from https://github.com/mail6heatler/Project-HEARTH. Never force-push.
-- Hosting: the earlier site (https://project-hearth-five.vercel.app) is a Vercel project connected to the mail6heatler repo. FLAME_HEARTH is not connected to Vercel yet; ask the owner before creating or linking a Vercel project.
+- Hosting: Vercel project `flame-hearth` (team abir69-bot's projects), live at https://flame-hearth.vercel.app. Every push to `main` deploys. Environment variables are set in Vercel → Settings → Environment Variables; redeploy after changing them. The earlier site (https://project-hearth-five.vercel.app) belongs to the mail6heatler repo.
 - Raw NASA data (READ-ONLY, never edit), committed in the GitHub repo and pulled with git: `Pseudo_DataKeep/{ACME,CFI,SPICE}/` each with `<INV>_Engineering_Doc.pdf`, `<INV>_Experimental_Table.csv`, `<INV>_Report.pdf`.
 - Clean data made by our script: `data/processed/` (committed, the app reads it).
 - Secrets: `.env.local` locally (git-ignored) and Vercel Environment Variables online. Possible keys: `ANTHROPIC_API_KEY`, `OPENROUTER_API_KEY`, `GROQ_API_KEY`, `GEMINI_API_KEY`, plus `ANTHROPIC_MODEL`, `OPENROUTER_MODEL`, `GROQ_MODEL`, `GEMINI_MODEL`. Every key is OPTIONAL; an empty value or a value containing `PASTE` counts as missing. NEVER print, log or commit a key.
