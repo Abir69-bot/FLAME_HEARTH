@@ -217,7 +217,7 @@ export function VestaPanel() {
 
       {/* On phones the panel sits below the page, so keep a way to reach it from anywhere */}
       {!panelInView && (
-        <button type="button" onClick={jumpToPanel} className="btn-ember fixed bottom-4 right-4 z-20 !rounded-full vesta:hidden">
+        <button type="button" onClick={jumpToPanel} data-print="hide" className="btn-ember fixed bottom-4 right-4 z-20 !rounded-full vesta:hidden">
           <span className="vesta-dot" aria-hidden />
           Ask VESTA
         </button>

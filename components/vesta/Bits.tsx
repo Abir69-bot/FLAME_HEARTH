@@ -1,4 +1,6 @@
 "use client";
+import { pdfHref } from "@/lib/pdf-links";
+import { sourceLabel } from "@/lib/source-label";
 import type { Confidence, Source } from "@/lib/types";
 
 const CONF: Record<Confidence, { label: string; cls: string; tip: string }> = {
@@ -17,13 +19,7 @@ export function ConfidenceTag({ value, note }: { value: Confidence; note?: strin
   );
 }
 
-export function sourceLabel(s: Source): string {
-  const f = s.file.split("/").pop() ?? s.file;
-  if (s.row) return `${f} · row ${s.row}`;
-  if (s.rows) return `${f} · rows ${s.rows.length > 18 ? `${s.rows.slice(0, 18)}…` : s.rows}`;
-  if (s.page) return `${f} · p${s.page}`;
-  return f;
-}
+export { sourceLabel };
 
 export function SourceChips({ sources, onOpen }: { sources: Source[]; onOpen?: (testId: string) => void }) {
   if (!sources.length) return null;
@@ -38,6 +34,10 @@ export function SourceChips({ sources, onOpen }: { sources: Source[]; onOpen?: (
               <button type="button" onClick={() => onOpen(s.test_id!)} className={`${cls} hover:border-ember hover:text-text`} title={`Open ${s.test_id}`}>
                 {label}
               </button>
+            ) : s.page && pdfHref(s.file, s.page) ? (
+              <a href={pdfHref(s.file, s.page)!} target="_blank" rel="noopener noreferrer" className={`${cls} inline-block hover:border-ember hover:text-text`} title={`Open ${label} in the NASA PDF (new tab)`}>
+                {label} ↗
+              </a>
             ) : (
               <span className={cls} title={s.note}>
                 {label}

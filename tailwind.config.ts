@@ -45,6 +45,10 @@ const config: Config = {
           "0%": { transform: "translateX(100%)" },
           "100%": { transform: "translateX(0)" },
         },
+        slideInLeft: {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(0)" },
+        },
         twinkle: {
           "0%,100%": { opacity: "1", transform: "scale(1)" },
           "50%": { opacity: "0.6", transform: "scale(0.82)" },
@@ -59,6 +63,7 @@ const config: Config = {
         fadeUp: "fadeUp 0.45s ease-out both",
         flicker: "flicker 2.4s ease-in-out infinite",
         slideIn: "slideIn 0.3s ease-out both",
+        slideInLeft: "slideInLeft 0.25s ease-out both",
         twinkle: "twinkle 3.2s ease-in-out infinite",
         alertIn: "alertIn 0.9s ease-out 2",
       },

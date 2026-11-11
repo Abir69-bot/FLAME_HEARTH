@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { pdfHref } from "@/lib/pdf-links";
 import { useHearth } from "@/lib/store";
 import type { TestRecord } from "@/lib/types";
 import { IconClose } from "./Icons";
@@ -131,7 +132,13 @@ export function TestDrawer() {
                   {data.passages.map((p, i) => (
                     <li key={i} className="rounded border border-line bg-bg p-2 text-xs text-muted">
                       {p.snippet}
-                      <span className="mt-1 block font-mono text-[10px]">{p.source_file.split("/").pop()} · p{p.page}</span>
+                      {pdfHref(p.source_file, p.page) ? (
+                        <a href={pdfHref(p.source_file, p.page)!} target="_blank" rel="noopener noreferrer" className="mt-1 block font-mono text-[10px] text-ember-soft hover:text-ember">
+                          {p.source_file.split("/").pop()} · p{p.page} ↗ open the page
+                        </a>
+                      ) : (
+                        <span className="mt-1 block font-mono text-[10px]">{p.source_file.split("/").pop()} · p{p.page}</span>
+                      )}
                     </li>
                   ))}
                 </ul>

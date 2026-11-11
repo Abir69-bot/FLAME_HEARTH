@@ -52,3 +52,15 @@ export const IconCopy = (p: P) => (
 export const IconPin = (p: P) => (
   <svg {...base} className={p.className}><path d="M12 17v4M8 3h8l-1 6 3 3H6l3-3z" /></svg>
 );
+export const IconInsights = (p: P) => (
+  <svg {...base} className={p.className}><path d="M4 20h16" /><circle cx="7" cy="14" r="1.6" /><circle cx="11" cy="9" r="1.6" /><circle cx="15" cy="12" r="1.6" /><circle cx="19" cy="5" r="1.6" /></svg>
+);
+export const IconReport = (p: P) => (
+  <svg {...base} className={p.className}><path d="M7 3h7l5 5v13H7z" /><path d="M14 3v5h5M10 13h6M10 17h6" /></svg>
+);
+export const IconSearch = (p: P) => (
+  <svg {...base} className={p.className}><circle cx="11" cy="11" r="7" /><path d="M16.5 16.5L21 21" /></svg>
+);
+export const IconMenu = (p: P) => (
+  <svg {...base} className={p.className}><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+);

@@ -9,8 +9,8 @@ It is guided by VESTA (Virtual Engineer for Space-fire Threat Assessment), an AI
 - Challenge goals: (1) find investigations most relevant to crew habitats, (2) extract data for flammability modeling, (3) highlight research for next-generation fire-safety equipment. Bonus: uses on Earth.
 
 ## Where things live
-- GitHub repo: https://github.com/mail6heatler/Project-HEARTH.git (branch `main`). It may already contain a README with the Vercel link: keep it and merge, never force-push.
-- Hosting: the EXISTING Vercel project connected to this repo. Every push to `main` deploys. Never create a second Vercel project; link to the existing one.
+- GitHub repo: https://github.com/Abir69-bot/FLAME_HEARTH (branch `main`), pushed from the owner's account `Abir69-bot`. History before it comes from https://github.com/mail6heatler/Project-HEARTH. Never force-push.
+- Hosting: the earlier site (https://project-hearth-five.vercel.app) is a Vercel project connected to the mail6heatler repo. FLAME_HEARTH is not connected to Vercel yet; ask the owner before creating or linking a Vercel project.
 - Raw NASA data (READ-ONLY, never edit), committed in the GitHub repo and pulled with git: `Pseudo_DataKeep/{ACME,CFI,SPICE}/` each with `<INV>_Engineering_Doc.pdf`, `<INV>_Experimental_Table.csv`, `<INV>_Report.pdf`.
 - Clean data made by our script: `data/processed/` (committed, the app reads it).
 - Secrets: `.env.local` locally (git-ignored) and Vercel Environment Variables online. Possible keys: `ANTHROPIC_API_KEY`, `OPENROUTER_API_KEY`, `GROQ_API_KEY`, `GEMINI_API_KEY`, plus `ANTHROPIC_MODEL`, `OPENROUTER_MODEL`, `GROQ_MODEL`, `GEMINI_MODEL`. Every key is OPTIONAL; an empty value or a value containing `PASTE` counts as missing. NEVER print, log or commit a key.
@@ -52,7 +52,8 @@ O2 partial pressure: pO2 = (O2% / 100) × P. ISS reference = 3.087 psi.
 - Data prep (run locally once, again only if raw data changes): Python script `scripts/ingest/ingest.py` (pandas, pdfplumber, pymupdf; requirements in `scripts/ingest/requirements.txt`) writes `data/processed/tests.json`, `chunks.json`, `pdf_tables.json`, `ingest_report.md`.
 
 ## Folder layout (target)
-- `app/` pages: `/` overview, `/explorer`, `/compare`, `/safety`, `/lab`, `/simulator`, `/about`; `app/api/*` route handlers
+- `app/` pages: `/` overview, `/explorer`, `/insights`, `/compare`, `/safety`, `/report/[mission]`, `/lab`, `/dataset`, `/simulator`, `/about`; `app/api/*` route handlers (`/api/pdf/[file]` serves the NASA PDFs statically)
+- Navigation lives in `components/layout/nav.ts` (grouped; used by the side menu, the phone menu and the Ctrl K command palette). A new page goes there, in `VIEWS` of `lib/vesta/tools/ui_action.ts`, and in the Blueprint stories.
 - `components/` layout/, charts/, vesta/, ui/, fx/ (decorative canvas effects, never data), map3d/ (3D map scene; its scales are in `lib/map3d.ts`)
 - `lib/data.ts` (load + query processed data), `lib/physics.ts`, `lib/flame.ts`, `lib/missions.ts`, `lib/safety.ts`, `lib/search.ts`, `lib/types.ts`, `lib/store.ts`
 - `lib/vesta/` `agent.ts` (tool loop, provider-agnostic), `router.ts` (engine chain + fallback), `offline.ts` (Offline mode), `providers/` (`anthropic.ts`, `openai-compat.ts` (shared helper), `openrouter.ts`, `groq.ts`, `gemini.ts`, one shared interface), `system-prompt.md`, `tools/` (one file per tool), `grounding.ts`

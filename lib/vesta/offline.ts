@@ -235,7 +235,7 @@ async function investigation(c: Ctx, inv: Investigation): Promise<string[]> {
     const doc = d.passages[0];
     out.push(`The SPICE table has no oxygen or pressure column, so these values are the documented conditions${doc ? ` ${cite({ file: doc.source_file, page: doc.page })}` : ""}, not per-row measurements.`);
   }
-  await call(c, "ui_action", { action: "go_view", view: "explorer" });
+  await call(c, "ui_action", { action: "go_view", view: inv === "ACME" ? "insights" : "explorer" });
   return out;
 }
 

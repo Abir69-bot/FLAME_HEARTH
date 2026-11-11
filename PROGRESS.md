@@ -7,6 +7,23 @@
 
 ## Log
 
+### FLAME_HEARTH: new interface and features (2026-11-11)
+**Done**
+- Moved to https://github.com/Abir69-bot/FLAME_HEARTH (pushed from `Abir69-bot`), with the full earlier history.
+- Interface: grouped side menu (Mission / Data / Try it); on phones a Menu button with a slide-in sheet replaces the sideways strip, and the mission chips become a dropdown; Ctrl/⌘ K command palette (pages, missions, tests by id or fuel via `/api/tests`, "Ask VESTA"); search button in the top bar; four next-step cards on the overview.
+- `/insights` (`lib/insights.ts`, `components/insights/InsightsView.tsx`): ignition map, burn-time explorer with Spearman rank correlation in plain words, flame endings by O2 band, oxygen used per test and burner heat, CFI test matrix, SPICE flow coverage. All counts tested against values computed independently in Python.
+- `/report/[mission]` (`lib/report.ts`): static, printable mission report; print CSS hides the app and switches to paper colours.
+- `/api/pdf/[file]` (`lib/pdf-links.ts`): the six NASA PDFs as static files; page citations in VESTA chips, the test drawer and the Safety page open the PDF at that page.
+- VESTA `ui_action` can open `insights` and `report`. Blueprint stories added. 13 new tests (183 in total).
+- Checked in headless Chrome: Ctrl K finds and opens a test, navigates to Insights; 5 charts drawn; phone Menu, mission dropdown and report with no sideways scroll at 400 px; print view hides VESTA and is white; Safety links PDF pages.
+
+**Problems**
+- The C: drive was full (0 MB free), which made builds and test workers crash with out-of-memory. Freed the session's own temporary files after asking; build and test temp now live on E:.
+- `sourceLabel` lived in a client file, so the server-rendered report could not call it; moved to `lib/source-label.ts`.
+
+**Not done**
+- Not deployed: FLAME_HEARTH has no Vercel project yet.
+
 ### Stability and docs fixes (2026-11-11, branch `fix/stability-and-docs`)
 **Done**
 - Offline mode: new `investigation` intent. A question about what one investigation covered ("What oxygen levels were tested in the CFI droplet experiments?") now answers with that investigation's O2, pressure, airflow and fuel ranges from `query_data`, instead of the generic mission assessment. SPICE answers say its O2/pressure are documented conditions and cite the report page via `search_docs`. Airflow leaves out rows that failed the range check, as `/dataset` does. Questions that name a mission still go to `assess`.

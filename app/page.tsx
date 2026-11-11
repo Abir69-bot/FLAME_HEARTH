@@ -2,6 +2,7 @@ import { HabitatMap } from "@/components/charts/HabitatMap";
 import { RankBars } from "@/components/charts/RankBars";
 import { HeroBand } from "@/components/layout/HeroBand";
 import { MissionHeader } from "@/components/layout/MissionHeader";
+import { QuickStart } from "@/components/layout/QuickStart";
 import { PinnedCharts } from "@/components/vesta/PinnedCharts";
 
 export default function Overview() {
@@ -9,6 +10,7 @@ export default function Overview() {
     <div className="space-y-5">
       <HeroBand />
       <MissionHeader />
+      <QuickStart />
       <div className="grid gap-5 2xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <section id="tour-map" aria-label="Habitat relevance map" className="animate-fadeUp hud-panel p-4">
           <h2 className="mb-1 font-head text-sm font-semibold uppercase tracking-wider text-muted">Habitat relevance map</h2>

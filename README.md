@@ -2,7 +2,7 @@
 
 **Fire-safety intelligence for crewed habitats** — NASA Space Apps Challenge 2026.
 
-**Live site: https://project-hearth-five.vercel.app**
+**Repository: https://github.com/Abir69-bot/FLAME_HEARTH** · earlier live version: https://project-hearth-five.vercel.app (does not include the Insights, Mission report, PDF links and search added in this repository until it is redeployed from here).
 
 HEARTH (Habitat Environment Analysis & Risk Tracking Hub) summarises, ranks and interprets NASA microgravity combustion experiments to give fire-safety insights for crewed habitats: the ISS, a lunar base, pressurized rovers and spacesuits. It is guided by **VESTA** (Virtual Engineer for Space-fire Threat Assessment), an AI crewmate built as a tool-using agent: its tool results change what the dashboard shows.
 
@@ -18,12 +18,17 @@ Every number shown comes from the NASA data or a tested formula, every VESTA cla
 |---|---|
 | **Mission overview** (`/`) | Active mission with envelope status and KPI tiles (O2, pressure, pO2, × ISS, × Earth air, tests nearby); habitat relevance map of every test as a 3D scene with a flat chart switch (O2 vs pressure, ISS pO2 line, Moon base / rover zone, pulsing mission marker, zoom, click for details); investigation ranking with score parts; pinned VESTA charts. |
 | **Test explorer** (`/explorer`) | Filter by investigation, fuel phase, O2 range and text; sortable, paged table; charts that follow the filters; details drawer with every field, source row and related PDF passages. |
+| **Insights** (`/insights`) | Patterns across many tests, built straight from the rows: ACME ignition map (by fuel and flame type), burn time against O2, pressure, flame temperature or mixture fraction (with a plain-words Spearman rank correlation, never a prediction), how flames ended by O2 band, oxygen used per test and burner heat, the CFI fuel × pressure test matrix with untested cells, and SPICE fuel-rate × air-speed coverage per nozzle. Every chart has its limits and source; click a point to open the test. |
+| **Mission report** (`/report/[mission]`) | One printable page per mission (print or save as PDF): conditions, data coverage, hazard index, the 5 closest tests with source rows, all six safety findings with evidence and sources, and the limits. Print styles hide the app chrome. |
 | **Compare** (`/compare`) | 2–3 investigations: coverage radar (formula on each axis), mean conditions, overlay scatter, shared and unique attributes. |
 | **Safety & gaps** (`/safety`) | Six evidence-based rules (oxygen enrichment, untested cabin materials, cool flames, smoke detection, still air & flow control, partial gravity) with documented severity, confidence and sources; O2 × pressure gap heatmap; experiments that would fill each gap; uses on Earth. |
 | **My data lab** (`/lab`) | Your own O2 / pressure / airflow / material: pO2, envelope, heuristic hazard index with its parts, nearest 5 tests; CSV upload kept in the browser only; **DEMO** cabin telemetry with a fire drill (clearly simulated). |
 | **Dataset** (`/dataset`) | Everything about the data: how it is stored, an interactive split explorer, every field with its fill rate and origin, investigation profiles, distributions, raw row vs clean record, quality flags and limits, a repeatable train/test split builder, downloads (CSV, JSON, dictionary) and NASA references with checksums. |
 | **Flame simulator** (`/simulator`) | **DEMO** replays of real tests in microgravity and on Earth. The moving flame is artwork steered by NASA results, not a combustion model; its numbers come from the test rows it cites, and settings with no nearby test show the data gap instead of a flame. |
 | **About** (`/about`) | Investigations, hardware, files, reference atmospheres, credits, limits and how VESTA works. |
+| **Search** (Ctrl/⌘ K, every page) | Jump to a page, switch mission, open a test by id or fuel, or hand a question to VESTA. |
+| **NASA PDF links** (every page) | Any source chip with a page number opens that page of the NASA report or engineering document (`/api/pdf/[file]`, built at deploy time). |
+| **Navigation** | Side menu grouped into Mission, Data and Try it; on phones a Menu button opens the same list and the mission chips become a dropdown. |
 | **VESTA panel** (every page) | Streaming answers with live tool steps, inline charts (pin to dashboard), source chips, confidence tag, engine badge, model menu, Student / Researcher / Engineer levels, proactive alert when the mission changes. |
 
 ## VESTA engine chain

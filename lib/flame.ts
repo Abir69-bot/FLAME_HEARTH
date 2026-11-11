@@ -55,12 +55,12 @@ export interface FlameDataset {
   spice: SpiceRow[];
 }
 
-function parseIgnition(outcome: string | null): Ignition | null {
+export function parseIgnition(outcome: string | null): Ignition | null {
   const m = outcome?.match(/hot ignition: (yes|no|flash)/);
   return m ? (m[1] as Ignition) : null;
 }
 
-function parseEnding(outcome: string | null): Ending | null {
+export function parseEnding(outcome: string | null): Ending | null {
   if (outcome?.includes("ended: self-extinguished")) return "self";
   if (outcome?.includes("ended: flow terminated")) return "flow";
   return null;

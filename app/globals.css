@@ -49,6 +49,39 @@ h1, h2, h3, h4 {
   scrollbar-color: var(--line) transparent;
 }
 
+/* Printing (mission report): paper colours, no app chrome, no decoration. */
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    color: #111 !important;
+  }
+  .space-backdrop,
+  #vesta-panel,
+  [data-print="hide"],
+  header.sticky,
+  nav[aria-label="Main"],
+  footer {
+    display: none !important;
+  }
+  .report,
+  .report * {
+    color: #111 !important;
+    background: transparent !important;
+    border-color: #bbb !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    -webkit-text-fill-color: #111 !important;
+  }
+  .report .hud-panel::before,
+  .report .hud-panel::after {
+    display: none !important;
+  }
+  .break-inside-avoid {
+    break-inside: avoid;
+  }
+}
+
 /* Deep space behind everything: a soft ember glow and cold starlight. */
 .space-backdrop {
   background:

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { EChart } from "@/components/charts/EChart";
 import { ConfidenceTag, sourceLabel } from "@/components/vesta/Bits";
 import { getMission } from "@/lib/missions";
+import { pdfHref } from "@/lib/pdf-links";
 import { useHearth } from "@/lib/store";
 import type { Confidence, Source } from "@/lib/types";
 
@@ -176,7 +177,11 @@ export function SafetyView() {
                     {f.evidence.map((e, i) => (
                       <li key={i} className="rounded border border-line bg-bg px-2 py-1 text-xs">
                         {e.text}
-                        {e.source && (
+                        {e.source && !e.source.test_id && e.source.page && pdfHref(e.source.file, e.source.page) ? (
+                          <a href={pdfHref(e.source.file, e.source.page)!} target="_blank" rel="noopener noreferrer" className="ml-1 font-mono text-[10px] text-muted hover:text-ember-soft" title="Open the page in the NASA PDF (new tab)">
+                            · {sourceLabel(e.source)} ↗
+                          </a>
+                        ) : e.source && (
                           <button
                             type="button"
                             disabled={!e.source.test_id}
@@ -233,7 +238,13 @@ export function SafetyView() {
             <div key={e.title} className="rounded-lg border border-line bg-bg p-3 text-sm">
               <h3 className="mb-1 font-semibold text-spice">{e.title}</h3>
               <p className="text-muted">{e.text}</p>
-              <p className="mt-1 font-mono text-[10px] text-muted">{e.sources.map((s) => `${s.file} p${s.page}`).join(" · ")}</p>
+              <p className="mt-1 flex flex-wrap gap-x-2 font-mono text-[10px] text-muted">
+                {e.sources.map((s) => (
+                  <a key={`${s.file}-${s.page}`} href={pdfHref(s.file, s.page) ?? undefined} target="_blank" rel="noopener noreferrer" className="hover:text-ember-soft" title="Open the page in the NASA PDF (new tab)">
+                    {s.file} p{s.page} ↗
+                  </a>
+                ))}
+              </p>
             </div>
           ))}
         </div>
